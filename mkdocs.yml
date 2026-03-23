@@ -1,0 +1,26 @@
+site_name: EKS Practice
+site_url: https://pyy0715.github.io/eks-pratice/
+repo_url: https://github.com/pyy0715/eks-pratice
+exclude_docs: |
+  superpowers/
+theme:
+  name: material
+  language: ko
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - navigation.top
+    - toc.follow
+    - content.code.copy
+nav:
+  - Home: index.md
+  - Week 1:
+    - week1/index.md
+    - Architecture: week1/architecture.md
+    - Data Plane: week1/data-plane.md
+    - Add-ons & Capabilities: week1/addons.md
+    - Authentication: week1/authentication.md
+    - Endpoint Access: week1/endpoint-access.md
+    - Worker Node: week1/worker-node.md
+    - Lab: week1/lab.md
