@@ -3,5 +3,9 @@
 *.tfstate.*
 .terraform/
 .tfstate.d/
-*.tfvars
 .DS_Store
+
+# MkDocs
+site/
+.cache/
+.venv/
