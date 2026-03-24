@@ -71,11 +71,16 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - def_list
+  - abbr
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
@@ -91,6 +96,14 @@ markdown_extensions:
       repo_url_shorthand: true
       user: pyy0715
       repo: eks-pratice
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.snippets:
+      auto_append:
+        - docs/_includes/abbreviations.md
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
 # Plugins
 plugins:
@@ -111,3 +124,14 @@ nav:
       - Endpoint Access: week1/5_endpoint-access.md
       - Worker Node: week1/6_worker-node.md
       - Lab: week1/7_lab.md
+  - Week 2:
+      - week2/index.md
+      - Background: week2/0_background.md
+      - VPC CNI Architecture: week2/1_vpc-cni.md
+      - IP Allocation Modes: week2/2_ip-modes.md
+      - Pod Capacity: week2/3_pod-capacity.md
+      - Pod Networking: week2/4_pod-networking.md
+      - Service & DNS: week2/5_service-dns.md
+      - Load Balancer Controller: week2/6_load-balancer.md
+      - Gateway API & ExternalDNS: week2/7_gateway-dns.md
+      - Lab: week2/8_lab.md
