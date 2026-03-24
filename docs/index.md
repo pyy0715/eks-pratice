@@ -1,18 +1,30 @@
-# EKS Practice
+# AWS EKS Workshop Study (AEWS)
 
-AWS EKS(Elastic Kubernetes Service)를 학습하고 실습하는 저장소입니다.
+[CloudNet@](https://gasidaseo.notion.site/26-AWS-EKS-Hands-on-Study-4-31a50aec5edf804b8294d8d512c43370) AWS EKS 스터디 저장소입니다.
 
-## 주차별 목차
+## Curriculum
 
-- [Week 1: Architecture & Compute Options](week1/index.md)
+| Week | Topic |
+|------|-------|
+| 1 | [EKS Introdcution & Deploy](week1/index.md) |
+| 2 | EKS Netwokring |
+| 3 | EKS Compute & Scaling (Node Group, Spot, Karpenter, Fargate, HPA, KEDA)|
+| 4 | EKS Security |
+| 5 | EKS Troubleshooting & Debugging|
+| 6 | CI/CD(ArgoCD(Gitea), kro, terraform, ArgoCD Capability) |
+| 7 | EKS Upgrade |
+| 8 | EKS Automation & Operations (Auto Mode, AgentOps) |
+| 9 | ML & AI on EKS |
 
 ## Prerequisites
 
-- AWS CLI configured (`aws configure`)
-- kubectl installed
-- [mise](https://mise.jdx.dev) installed
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+- [Set up kubectl and eksctl](https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html)
+- [mise](https://mise.jdx.dev)
 
-    ```bash
-    # Install all tools (terraform, tflint, python, uv)
-    mise install
-    ```
+## Setup
+
+```bash
+# Install all tools (terraform, tflint, python, uv)
+mise install
+```

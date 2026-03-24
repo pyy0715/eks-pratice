@@ -8,6 +8,12 @@ variable "ssh_access_cidr" {
   type        = string
 }
 
+variable "endpoint_public_access" {
+  description = "Whether to enable public access to the EKS API server endpoint."
+  type        = bool
+  default     = true
+}
+
 variable "endpoint_private_access" {
   description = "Whether to enable private access to the EKS API server endpoint."
   type        = bool

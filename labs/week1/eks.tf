@@ -38,9 +38,9 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.public_subnets
 
-  endpoint_public_access       = true
+  endpoint_public_access       = var.endpoint_public_access
   endpoint_private_access      = var.endpoint_private_access
-  endpoint_public_access_cidrs = var.endpoint_private_access ? [var.ssh_access_cidr] : null
+  endpoint_public_access_cidrs = (var.endpoint_public_access && var.endpoint_private_access) ? [var.ssh_access_cidr] : null
 
   # controlplane log
   enabled_log_types = []
@@ -96,4 +96,10 @@ module "eks" {
     Environment = "cloudneta-lab"
     Terraform   = "true"
   }
+}
+
+resource "aws_iam_role_policy_attachment" "node_ssm_policy" {
+  count      = var.endpoint_public_access ? 0 : 1
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMRoleForInstancesQuickSetup"
+  role       = module.eks.eks_managed_node_groups["default"].iam_role_name
 }

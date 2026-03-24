@@ -4,6 +4,8 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
   "mkdocs-material>=9.5",
+  "pymdown-extensions>=10.0",
+  "click==8.2.1", # See https://github.com/mkdocs/mkdocs/issues/4032
 ]
 
 [tool.uv]

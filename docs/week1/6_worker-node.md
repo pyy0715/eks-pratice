@@ -20,25 +20,24 @@ ssh ec2-user@$NODE1
 sudo su -
 ```
 
-노드에 접속했다면, Kubernetes가 정상적으로 동작하기 위해 필요한 기본 조건들이 어떻게 설정되어 있는지 확인할 수 있습니다. 대표적으로 아래와 같습니다.
+노드에 접속했다면, Kubernetes가 정상적으로 동작하기 위해 필요한 기본 조건들이 어떻게 설정되어 있는지 확인할 수 있습니다.
 
-- SELinux Permissive
-- Swap 비활성화
-- 컨테이너 네트워킹을 위한 커널 파라미터
+???+ success "EKS Optimized AMI"
+    kubeadm으로 직접 설치해봤다면 이 항목들이 왜 필요한지 알고 있을 것입니다. EKS 최적화 AMI에는 아래 값들이 이미 반영되어 있어 사용자가 직접 설정할 필요가 없습니다.
 
-kubeadm으로 직접 설치해봤다면 이 항목들이 왜 필요한지 알고 있을 것입니다.
+    **SELinux Permissive**
+    :   `Enforcing` 모드에서는 컨테이너가 호스트 파일시스템에 접근하거나 네트워크 네임스페이스를 조작할 때 SELinux 정책이 차단합니다.
 
-- **SELinux Permissive**
+    **Swap 비활성화**
+    :   kubelet은 Pod의 메모리 requests/limits를 기반으로 스케줄링과 리소스 관리를 수행합니다. Swap이 활성화되면 메모리 부족 상황에서 컨테이너가 종료되지 않고 Swap으로 밀려나면서, 이러한 보장이 깨집니다. 이 때문에 kubelet은 기본적으로 Swap이 활성화된 상태에서 실행을 거부합니다.
 
-  `Enforcing` 모드에서는 컨테이너가 호스트 파일시스템에 접근하거나 네트워크 네임스페이스를 조작할 때 SELinux 정책이 차단합니다.
-- **Swap 비활성화**
+    **커널 파라미터**
 
-  kubelet은 Pod의 메모리 requests/limits를 기반으로 스케줄링과 리소스 관리를 수행합니다. Swap이 활성화되면 메모리 부족 상황에서 컨테이너가 종료되지 않고 Swap으로 밀려나면서, 이러한 보장이 깨집니다. 이 때문에 kubelet은 기본적으로 Swap이 활성화된 상태에서 실행을 거부합니다.
-- **커널 파라미터**
-  - `net.bridge.bridge-nf-call-iptables` — 브리지(veth)를 통과하는 트래픽이 iptables를 거치도록 합니다. 설정이 없으면 kube-proxy의 Service 라우팅 규칙이 적용되지 않습니다.
-  - `net.ipv4.ip_forward` — 컨테이너에서 외부로 나가는 트래픽을 허용합니다. 이 값이 비활성화되어 있으면 Pod 간 통신이나 외부 통신이 제한됩니다.
+    `net.bridge.bridge-nf-call-iptables`
+    :   브리지(veth)를 통과하는 트래픽이 iptables를 거치도록 합니다. 설정이 없으면 kube-proxy의 Service 라우팅 규칙이 적용되지 않습니다.
 
-위와 같은 설정들은 Kubernetes 동작에 필수적인 요소들입니다. 하지만 EKS에서 제공하는 최적화 AMI에는 이 값들이 이미 반영되어 있어, 사용자가 직접 설정할 필요는 없습니다.
+    `net.ipv4.ip_forward`
+    :   컨테이너에서 외부로 나가는 트래픽을 허용합니다. 이 값이 비활성화되어 있으면 Pod 간 통신이나 외부 통신이 제한됩니다.
 
 ### containerd
 
@@ -47,7 +46,10 @@ kubeadm으로 직접 설치해봤다면 이 항목들이 왜 필요한지 알고
 ![cat /etc/containerd/config.toml](assets/2026-03-18-eks-week1-9.png)
 *cat /etc/containerd/config.toml*
 
-- `SystemdCgroup = true` — cgroup 관리 드라이버로 systemd를 사용합니다. kubelet 설정의 `cgroupDriver: systemd`와 반드시 일치해야 합니다. 불일치하면 노드가 `NotReady` 상태가 되거나 컨테이너 리소스 관리에 문제가 발생합니다.
+- `SystemdCgroup = true` — cgroup 관리 드라이버로 systemd를 사용합니다. kubelet 설정의 `cgroupDriver: systemd`와 반드시 일치해야 합니다.
+
+    !!! warning
+        두 설정이 일치하지 않으면 노드가 `NotReady` 상태가 되거나 컨테이너 리소스 관리에 문제가 발생합니다.
 - `sandbox = "localhost/kubernetes/pause"` — 파드 생성 시, 가장 먼저 만드는 pause 컨테이너의 이미지 위치입니다.
 - `conf_dir = "/etc/cni/net.d"` — CNI 플러그인 설정 파일 위치입니다. Pod 네트워크 네임스페이스를 초기화할 때 containerd가 이 디렉터리에서 설정을 읽어 VPC CNI를 호출합니다.
 

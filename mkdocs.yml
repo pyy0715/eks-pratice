@@ -1,26 +1,113 @@
-site_name: EKS Practice
+# Project information
+site_name: AWS EKS Workshop Study (AEWS)
 site_url: https://pyy0715.github.io/eks-pratice/
+
+# Repository
 repo_url: https://github.com/pyy0715/eks-pratice
-exclude_docs: |
-  superpowers/
+repo_name: pyy0715/eks-pratice
+
+# Configuration
 theme:
   name: material
   language: ko
   features:
+    - content.code.copy
+    - content.code.annotate
+    # - content.code.select
+    # - content.footnote.tooltips
+    - content.tabs.link
+    - content.tooltips
+    # - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    # - navigation.instant
+    # - navigation.instant.prefetch
+    # - navigation.instant.progress
+    # - navigation.prune
+    - navigation.sections
     - navigation.tabs
     - navigation.tabs.sticky
-    - navigation.indexes
     - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
     - toc.follow
-    - content.code.copy
+    - toc.integrate
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/link
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to system preference
+
+  icon:
+    logo: material/kubernetes
+    repo: fontawesome/brands/github
+
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+# Extensions
+markdown_extensions:
+  - tables
+  - admonition
+  - footnotes
+  - attr_list
+  - md_in_html
+  - def_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+  - pymdownx.tilde
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.magiclink:
+      normalize_issue_symbols: true
+      repo_url_shortener: true
+      repo_url_shorthand: true
+      user: pyy0715
+      repo: eks-pratice
+
+# Plugins
+plugins:
+  - search:
+      lang:
+        - en
+        - ko
+
+# Page tree
 nav:
   - Home: index.md
   - Week 1:
-    - week1/index.md
-    - Architecture: week1/architecture.md
-    - Data Plane: week1/data-plane.md
-    - Add-ons & Capabilities: week1/addons.md
-    - Authentication: week1/authentication.md
-    - Endpoint Access: week1/endpoint-access.md
-    - Worker Node: week1/worker-node.md
-    - Lab: week1/lab.md
+      - week1/index.md
+      - Architecture: week1/1_architecture.md
+      - Data Plane: week1/2_data-plane.md
+      - Add-ons & Capabilities: week1/3_addons.md
+      - Authentication: week1/4_authentication.md
+      - Endpoint Access: week1/5_endpoint-access.md
+      - Worker Node: week1/6_worker-node.md
+      - Lab: week1/7_lab.md
