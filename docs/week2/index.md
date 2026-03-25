@@ -12,6 +12,5 @@ Week 2에서는 VPC CNI 아키텍처부터 IP 할당 모드, Pod 용량 계산, 
 - [Pod Capacity](3_pod-capacity.md) — maxPods 공식, Managed Node Group 결정 우선순위
 - [Pod Networking](4_pod-networking.md) — veth pair, Policy Routing, SNAT 흐름
 - [Service & DNS](5_service-dns.md) — kube-proxy 모드(iptables/nftables/eBPF), CoreDNS 최적화
-- [Load Balancer Controller](6_load-balancer.md) — AWS LBC 설치, NLB IP 모드, ALB Ingress
-- [Gateway API & ExternalDNS](7_gateway-dns.md) — Gateway API 리소스 구조, Route 53 자동 연동
-- [Lab](8_lab.md) — 실습 체크리스트 및 디버깅 명령어
+- [Load Balancer Controller & ExternalDNS](6_load-balancer.md) — AWS LBC 설치, NLB IP 모드, ALB Ingress
+<!--- [Lab](8_lab.md) — 실습 체크리스트 및 디버깅 명령어-->

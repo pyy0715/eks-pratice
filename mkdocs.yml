@@ -135,4 +135,4 @@ nav:
       - Pod Networking: week2/4_pod-networking.md
       - Service & DNS: week2/5_service-dns.md
       - Load Balancer Controller & ExternalDNS: week2/6_load-balancer.md
-      - Lab: week2/8_lab.md
+      # - Lab: week2/8_lab.md
