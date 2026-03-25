@@ -12,7 +12,7 @@ TF_VAR_KeyName = "{{ exec(command='aws ec2 describe-key-pairs --query \"KeyPairs
 TF_VAR_ssh_access_cidr = "{{ exec(command='curl -s ipinfo.io/ip') }}/32"
 
 [tasks.serve]
-run = "source .venv/bin/activate && mkdocs serve"
+run = "uv run mkdocs serve"
 
 [tasks.build]
 run = "uv run mkdocs build"

@@ -9,4 +9,7 @@
 *[BGP]: Border Gateway Protocol — AS(Autonomous System) 간 경로 정보를 교환하고 정책 기반으로 라우팅을 결정하는 프로토콜
 *[RFC 1918]: IANA가 사설 네트워크용으로 예약한 IPv4 주소 범위 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
 *[RFC 6598]: IANA가 CG-NAT용으로 예약한 IPv4 주소 범위 (100.64.0.0/10)
-*[CG-NAT]: Carrier-Grade NAT — ISP가 공인 IP 부족을 해결하기 위해 운영하는 대규모 NAT. 100.64.0.0/10 대역을 사용하며 공인 인터넷에서 라우팅되지 않음
+*[CG-NAT]: Carrier-Grade NAT — ISP가 공인 IP 부족을 해결하기 위해 운영하는 대규모 NAT로 100.64.0.0/10 대역을 사용하며 공인 인터넷에서 라우팅되지 않음
+
+*[ARP]: Address Resolution Protocol — IP 주소를 MAC 주소로 매핑하여 L2 통신을 가능하게 하는 프로토콜
+*[RFC 3927]: IANA가 link-local 자동 주소 설정용으로 예약한 IPv4 주소 범위 (169.254.0.0/16). 라우팅 테이블에 전파되지 않아 VPC/Pod CIDR와 충돌하지 않음

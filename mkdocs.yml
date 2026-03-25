@@ -134,6 +134,5 @@ nav:
       - Pod Capacity: week2/3_pod-capacity.md
       - Pod Networking: week2/4_pod-networking.md
       - Service & DNS: week2/5_service-dns.md
-      - Load Balancer Controller: week2/6_load-balancer.md
-      - Gateway API & ExternalDNS: week2/7_gateway-dns.md
+      - Load Balancer Controller & ExternalDNS: week2/6_load-balancer.md
       - Lab: week2/8_lab.md

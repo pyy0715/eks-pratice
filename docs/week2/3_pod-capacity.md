@@ -1,7 +1,7 @@
 # Pod Capacity
 
 EKS 노드에 배치할 수 있는 Pod 수는 ENI 구성과 kubelet 설정에 의해 결정됩니다.
-이 페이지에서는 maxPods 계산 공식, 결정 우선순위등을 확인합니다.
+이 페이지에서는 maxPods 계산 공식, 결정 우선순위 등을 다룹니다.
 
 ---
 
@@ -43,13 +43,13 @@ maxPods = (MaxENI × (IPv4/ENI − 1)) + 2
 
 ---
 
-## maxPods Decision Path
+## How maxPods is determined
 
-maxPods가 설정되는 경로는 Launch Template에 Custom AMI를 지정하는지에 따라 갈립니다. EKS-optimized AMI를 사용하면 EKS가 직접 주입하고, Custom AMI를 지정하면 bootstrap 전체를 직접 작성합니다.
+Managed Node Group에서는 Launch Template에 Custom AMI를 지정했는지에 따라 maxPods 결정 방식이 달라집니다. EKS-optimized AMI를 사용하면 EKS가 값을 직접 설정하고, Custom AMI를 지정하면 node bootstrapping 전체를 직접 구성해야 합니다. Self-managed node group은 이 흐름에 해당하지 않으며, AMI 종류와 무관하게 ENI 공식값이 그대로 적용됩니다.
 
 ```mermaid
 flowchart TD
-    A["Node Bootstrap"] --> B{"Custom AMI?"}
+    A["Managed Node Group Bootstrap"] --> B{"Custom AMI?"}
     B -->|"No (EKS-optimized)"| C{"vCPU < 30?"}
     C -->|"Yes"| D["maxPods = 110"]
     C -->|"No"| E["maxPods = 250"]
@@ -58,19 +58,19 @@ flowchart TD
 
 ### EKS-optimized AMI
 
-Launch Template에 AMI ID를 지정하지 않으면 EKS가 userdata를 자동 구성하며 `--max-pods`를 주입합니다. Prefix Delegation 활성화 여부와 무관하게 vCPU 수에 따라 상한이 결정됩니다.[^mng-cap]
+Launch Template에 AMI ID를 지정하지 않은 Managed Node Group에서는 EKS가 userdata를 제어하여 `--max-pods`를 설정합니다. 이 값은 Prefix Delegation 활성화 여부와 무관하게 vCPU 수에 따라 110 또는 250으로 고정됩니다.[^mng-cap]
 
 - vCPU < 30 → 110
-- vCPU ≥ 30 → 250
+- vCPU > 30 → 250
 
-[^mng-cap]: [Increase the available IP addresses for your Amazon EKS node](https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses-procedure.html)
+[^mng-cap]: [Choose an optimal Amazon EC2 node instance type](https://docs.aws.amazon.com/eks/latest/userguide/choosing-instance-type.html)
 
 !!! warning "Silently ignored"
-    EKS-optimized AMI를 사용하는 경우 kubelet-extra-args, nodeadm의 maxPodsExpression 등 어떤 설정을 추가해도 EKS 주입값에 덮어씌워지며 경고나 오류가 없습니다. maxPods를 직접 제어하려면 Custom AMI를 사용해야 합니다.
-
+    EKS-optimized AMI를 사용하는 경우 kubelet-extra-args, maxPodsExpression 등 어떤 설정을 추가해도 EKS가 설정한 110 또는 250으로 덮어씌워지며 별도 알림 없이 무시됩니다. maxPods를 직접 제어하려면 Custom AMI를 사용해야 합니다.
+    
 ### Custom AMI
 
-Launch Template에 Custom AMI ID를 지정하면 EKS는 userdata를 주입하지 않습니다. maxPods를 포함한 bootstrap 전체를 직접 작성합니다.
+Launch Template에 Custom AMI ID를 지정하면 EKS는 userdata를 주입하지 않으므로 maxPods를 포함한 node bootstrapping 전체를 직접 구성해야 합니다. AL2는 bootstrap.sh, AL2023은 nodeadm으로 kubelet을 구성합니다.
 
 === "AL2 (bootstrap.sh)"
 
@@ -86,16 +86,11 @@ Launch Template에 Custom AMI ID를 지정하면 EKS는 userdata를 주입하지
 
 === "AL2023 (nodeadm)"
 
-    `NodeConfig`에서 정적 값 또는 인스턴스 메타데이터 기반 수식으로 설정합니다. 수식에서 사용 가능한 변수:
+    `NodeConfig`의 `maxPodsExpression` 필드에 CEL(Common Expression Language) 수식을 작성하면 nodeadm이 부팅 시 다음 변수를 채워 kubelet에 전달합니다.
 
-    `default_enis`
-    :   인스턴스에 연결 가능한 최대 ENI 수
-
-    `ips_per_eni`
-    :   ENI당 최대 IPv4 주소 수
-
-    `max_pods`
-    :   ENI 공식 기본값: `(default_enis × (ips_per_eni − 1)) + 2`
+    - `default_enis`: 인스턴스에 연결 가능한 최대 ENI 수
+    - `ips_per_eni`: ENI당 최대 IPv4 주소 수
+    - `max_pods`: ENI 공식 기본값 — `(default_enis × (ips_per_eni − 1)) + 2`
 
     ```yaml
     # Prefix Delegation 적용 시
