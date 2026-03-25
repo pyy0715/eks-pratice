@@ -1,17 +1,8 @@
-> Cloudnet@EKS Week2
-
 # Week 2: EKS Networking
 
 AWS EKS는 Amazon VPC CNI를 통해 Pod IP를 VPC 네이티브 주소로 직접 부여합니다. 오버레이 터널 없이 VPC 라우팅만으로 Pod 간 통신이 가능하며, Security Group, VPC Flow Logs, 라우팅 정책이 Pod 수준까지 그대로 적용됩니다.
 
 Week 2에서는 VPC CNI 아키텍처부터 IP 할당 모드, Pod 용량 계산, Service/DNS, Load Balancer, Gateway API까지 EKS 네트워킹 전반을 다룹니다.
-
-!!! info "Week 1 복습"
-    aws-node DaemonSet과 kube-proxy는 Week 1에서 소개했습니다.
-    자세한 내용은 [Add-ons & Capabilities](../week1/3_addons.md)와
-    [Worker Node](../week1/6_worker-node.md)를 참고하세요.
-
----
 
 ## Contents
 

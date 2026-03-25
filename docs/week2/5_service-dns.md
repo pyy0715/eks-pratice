@@ -27,6 +27,22 @@ kube-proxy와 CoreDNS의 기본 개념은 [Week 1 Add-ons](../week1/3_addons.md)
 
     Pod 3개일 때 순차 매칭 확률: 0.333 → 0.500 → 1.000
 
+    ```bash
+    # 서비스 체인에서 확률 규칙 확인
+    sudo iptables -t nat -L KUBE-SVC-XXXXXXXXX -n
+    # KUBE-SEP-AAA  statistic mode random probability 0.33333
+    # KUBE-SEP-BBB  statistic mode random probability 0.50000
+    # KUBE-SEP-CCC  (확률 없음 — 항상 선택)
+
+    # DNAT 규칙 확인 (목적지를 실제 Pod IP로 교체)
+    sudo iptables -t nat -L KUBE-SEP-AAA -n
+    # DNAT  tcp  to:10.0.97.30:8080
+    ```
+
+    kube-proxy는 DaemonSet으로 모든 노드에서 실행되며 API 서버의 Service·EndpointSlice 변경을 감지해 각 노드의 iptables를 갱신합니다. 모든 노드가 동일한 규칙을 가지므로 NodePort 트래픽은 어느 노드로 들어와도 목적지 Pod에 도달합니다. NodePort는 `KUBE-SERVICES` 뒤에 `KUBE-NODEPORTS` 체인이 추가되며, ClusterIP와 달리 클라이언트 IP가 SNAT됩니다.
+
+    이 전파에는 시간이 걸립니다. VPC CNI가 Pod 삭제 후 30초 동안 IP를 Warm Pool로 반환하지 않는 이유([VPC CNI Architecture](./1_vpc-cni.md#warm-pool-allocation-flow))도 여기에 있습니다. 전파 완료 전에 같은 IP가 새 Pod에 재사용되면 일부 노드의 iptables가 여전히 삭제된 Pod를 가리켜 트래픽이 잘못 전달됩니다.
+
 === "nftables (v1.31+, 권장)"
 
     iptables API의 후계자로, nftables API → netfilter subsystem을 사용합니다.

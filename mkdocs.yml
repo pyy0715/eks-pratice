@@ -72,6 +72,8 @@ markdown_extensions:
   - md_in_html
   - def_list
   - abbr
+  - toc:
+      toc_depth: 3
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite

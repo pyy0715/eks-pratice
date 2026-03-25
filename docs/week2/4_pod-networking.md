@@ -18,7 +18,7 @@ ip route show
 # default via 169.254.1.1 dev eth0
 # 169.254.1.1 dev eth0
 
- arp -n
+arp -n
 # 169.254.1.1  PERM  <veth MAC>   ← 호스트 veth에 대한 정적 ARP 항목
 ```
 
@@ -147,3 +147,5 @@ SNAT 소스 IP를 Secondary ENI가 아닌 Primary ENI IP로 고정하는 데는 
     !!! warning "주의사항"
         IPv6 전용 클러스터에서는 SNAT 자체가 적용되지 않으므로 이 설정이 무의미합니다.
         Windows 노드에는 이 환경변수가 적용되지 않습니다 (Windows 전용 파라미터를 사용해야 합니다).
+
+iptables는 아웃바운드 SNAT 외에 Service 트래픽 분산에도 사용됩니다. ClusterIP가 가상 IP로 동작하는 원리와 kube-proxy 모드는 [Service & kube-proxy](./5_service-dns.md)에서 다룹니다.
