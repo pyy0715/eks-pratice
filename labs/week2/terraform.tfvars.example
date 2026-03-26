@@ -1,0 +1,4 @@
+KeyName            = "your-key-name"
+ssh_access_cidr    = "YOUR_IP/32"
+MyDomain           = "example.com"
+MyDnzHostedZoneId  = "Z0123456789ABCDEFGHIJ"

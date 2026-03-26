@@ -1,7 +1,7 @@
 # Pod Capacity
 
 EKS 노드에 배치할 수 있는 Pod 수는 ENI 구성과 kubelet 설정에 의해 결정됩니다.
-이 페이지에서는 maxPods 계산 공식, 결정 우선순위 등을 다룹니다.
+해당 섹션에서는 maxPods 계산 공식, 결정 우선순위 등을 다룹니다.
 
 ---
 

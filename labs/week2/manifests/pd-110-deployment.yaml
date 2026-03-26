@@ -1,0 +1,35 @@
+---
+# Prefix Delegation + maxPods=110 검증용 Deployment
+# pd-110 노드 그룹에 50개 Pod 배치하여 Secondary IP 모드 한계(17개) 초과 확인
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pd-test
+spec:
+  replicas: 50
+  selector:
+    matchLabels:
+      app: pd-test
+  template:
+    metadata:
+      labels:
+        app: pd-test
+    spec:
+      tolerations:
+        - key: "challenge"
+          operator: "Equal"
+          value: "pd-110"
+          effect: "NoSchedule"
+      nodeSelector:
+        challenge: "pd-110"
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: pause
+          image: registry.k8s.io/pause:3.10
+          resources:
+            requests:
+              cpu: 5m
+              memory: 5Mi
+            limits:
+              cpu: 5m
+              memory: 5Mi

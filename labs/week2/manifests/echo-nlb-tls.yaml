@@ -1,0 +1,51 @@
+---
+# NLB TLS + ExternalDNS 도전과제
+# 적용 전: ACM_ARN과 MYDOMAIN을 실제 값으로 치환
+#   sed "s/REPLACE_ACM_ARN/$ACM_ARN/; s/REPLACE_MYDOMAIN/$MyDomain/" echo-nlb-tls.yaml | kubectl apply -f -
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo-tls-deploy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: echo-tls
+  template:
+    metadata:
+      labels:
+        app: echo-tls
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+        - name: echo
+          image: registry.k8s.io/echoserver:1.10
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-nlb-tls
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: deregistration_delay.timeout_seconds=60
+    # TLS termination at NLB
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: REPLACE_ACM_ARN
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    # ExternalDNS
+    external-dns.alpha.kubernetes.io/hostname: echo.REPLACE_MYDOMAIN
+spec:
+  allocateLoadBalancerNodePorts: false
+  type: LoadBalancer
+  selector:
+    app: echo-tls
+  ports:
+    - name: https
+      port: 443
+      targetPort: 8080
+      protocol: TCP

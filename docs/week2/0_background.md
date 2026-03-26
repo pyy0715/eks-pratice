@@ -171,3 +171,16 @@ graph TD
 ipamd가 노드에서 백그라운드로 동작하는 데몬인 것도 같은 이유입니다. CNI 바이너리는 Pod마다 실행되고 바로 종료되므로 상태를 유지할 수 없습니다. ipamd가 EC2 API 호출, ENI 상태, IP 풀을 관리하고, CNI 바이너리가 필요할 때 ipamd에 IP를 요청하는 구조입니다.
 
 Warm Pool 크기를 조정하는 환경 변수(`WARM_ENI_TARGET`, `WARM_IP_TARGET`, `MINIMUM_IP_TARGET`)는 [VPC CNI Architecture](./1_vpc-cni.md)에서 자세히 다룹니다.
+
+---
+
+## iptables
+
+iptables는 리눅스 커널의 netfilter 위에서 동작하는 패킷 필터링 및 주소 변환 도구입니다. 규칙은 역할에 따라 **테이블**로 분류되고, 패킷이 지나는 경로 상의 **체인**에 연결됩니다.
+
+![iptables](https://upload.wikimedia.org/wikipedia/commons/9/91/Iptables_diagram.png)
+*[Source: Iptables diagram](https://commons.wikimedia.org/wiki/File:Iptables_diagram.png)*
+
+패킷이 어느 경로를 타느냐에 따라 거치는 체인이 달라지고, 각 체인에서 해당 테이블의 규칙이 순서대로 평가됩니다. 처음 매칭된 규칙의 target이 실행되고 평가가 중단됩니다.
+
+관련해서 상세한 내용은 [Iptables와 Kubernetes ClusterIP의 Iptables](https://mokpolar.tistory.com/67) 를 참고하시길 바랍니다.
