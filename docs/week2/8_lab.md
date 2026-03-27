@@ -327,10 +327,6 @@ bash labs/week2/02_externaldns.sh
 `aws-load-balancer-ssl-cert`와 `aws-load-balancer-ssl-ports` annotation이 NLB 리스너에 TLS를 설정하고, `external-dns.alpha.kubernetes.io/hostname`이 ExternalDNS에 도메인 등록을 요청합니다.
 
 ```bash
-export ACM_ARN=$(aws acm list-certificates \
-  --query "CertificateSummaryList[?DomainName=='*.$MyDomain'].CertificateArn" \
-  --output text)
-
 sed "s|REPLACE_ACM_ARN|$ACM_ARN|; s|REPLACE_MYDOMAIN|$MyDomain|" \
   labs/week2/manifests/echo-nlb-tls.yaml | kubectl apply -f -
 
@@ -358,21 +354,54 @@ curl -v https://echo.$MyDomain
 
 ## Cleanup
 
-생성 역순으로 삭제합니다. LBC/ExternalDNS가 관리하는 AWS 리소스(NLB, ALB, Route53 레코드)는 Kubernetes 리소스를 먼저 삭제해야 함께 정리됩니다.
+`$ACCOUNT_ID`, `$CLUSTER_NAME` 등 환경변수가 필요하므로 먼저 source를 실행합니다.
 
 ```bash
-# NLB TLS + ExternalDNS
-kubectl delete svc svc-nlb-tls
-kubectl delete -f labs/week2/manifests/game-2048.yaml
-kubectl delete -f labs/week2/manifests/echo-nlb-ip.yaml
+source labs/week2/00_env.sh
+```
 
-# NLB/ALB가 완전히 삭제될 때까지 대기
-aws elbv2 describe-load-balancers --query 'LoadBalancers[].LoadBalancerName' --output text
+LBC/ExternalDNS가 관리하는 AWS 리소스(NLB, ALB, Route53 레코드)는 Kubernetes 리소스를 먼저 삭제해야 함께 정리됩니다.
 
-# pd-110 Pod
-kubectl delete -f labs/week2/manifests/pd-110-deployment.yaml
+```bash
+# K8s 리소스 삭제 → NLB/ALB/Route53 자동 정리
+kubectl delete svc svc-nlb-tls --ignore-not-found
+kubectl delete -f labs/week2/manifests/game-2048.yaml --ignore-not-found
+kubectl delete -f labs/week2/manifests/echo-nlb-ip.yaml --ignore-not-found
+kubectl delete -f labs/week2/manifests/pd-110-deployment.yaml --ignore-not-found
+kubectl delete pod netshoot --ignore-not-found
 
-# ExternalDNS, LBC
+# ExternalDNS Helm 제거
+helm uninstall external-dns
+
+# LBC Helm 제거
 helm uninstall aws-load-balancer-controller -n kube-system
-kubectl delete -f https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json 2>/dev/null || true
+
+# IRSA Role에서 Policy detach 후 삭제
+LBC_ROLE=$(aws iam list-roles \
+  --query "Roles[?contains(RoleName,'eksctl-myeks-addon-iamserviceaccount-kube')].RoleName" \
+  --output text)
+aws iam detach-role-policy \
+  --role-name $LBC_ROLE \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy
+aws iam delete-policy \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/AWSLoadBalancerControllerIAMPolicy
+
+DNS_ROLE=$(aws iam list-roles \
+  --query "Roles[?contains(RoleName,'eksctl-myeks-addon-iamserviceaccount-defa')].RoleName" \
+  --output text)
+aws iam detach-role-policy \
+  --role-name $DNS_ROLE \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/ExternalDNSPolicy
+aws iam delete-policy \
+  --policy-arn arn:aws:iam::${ACCOUNT_ID}:policy/ExternalDNSPolicy
+
+# IRSA Role 삭제
+eksctl delete iamserviceaccount \
+  --name aws-load-balancer-controller \
+  --namespace kube-system \
+  --cluster $CLUSTER_NAME
+eksctl delete iamserviceaccount \
+  --name external-dns \
+  --namespace default \
+  --cluster $CLUSTER_NAME
 ```
