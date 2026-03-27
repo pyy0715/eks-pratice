@@ -7,9 +7,10 @@ python    = "3.11.15"
 uv        = "0.10.11"
 
 [env]
-_.source = ".env"
+TF_VAR_MyDomain = "confclaw.com" # set this to your domain
 TF_VAR_KeyName = "{{ exec(command='aws ec2 describe-key-pairs --query \"KeyPairs[].KeyName\" --output text') }}"
 TF_VAR_ssh_access_cidr = "{{ exec(command='curl -s ipinfo.io/ip') }}/32"
+TF_VAR_MyDnzHostedZoneId = "{{ exec(command='aws route53 list-hosted-zones-by-name --dns-name \"$TF_VAR_MyDomain\" --query \"HostedZones[0].Id\" --output text | sed \"s|/hostedzone/||\"') }}"
 
 [tasks.serve]
 run = "uv run mkdocs serve"

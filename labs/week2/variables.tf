@@ -73,13 +73,3 @@ variable "public_subnet_blocks" {
   type        = list(string)
   default     = ["192.168.1.0/24", "192.168.2.0/24", "192.168.3.0/24"]
 }
-
-variable "MyDomain" {
-  description = "Route53 domain name (e.g. example.com)."
-  type        = string
-}
-
-variable "MyDnzHostedZoneId" {
-  description = "Route53 Hosted Zone ID for MyDomain."
-  type        = string
-}

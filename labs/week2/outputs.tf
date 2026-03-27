@@ -30,5 +30,5 @@ output "vpc_id" {
 
 output "eks_ami_id" {
   description = "EKS-optimized AMI ID used for pd-110 node group"
-  value       = data.aws_ssm_parameter.eks_ami.value
+  value       = nonsensitive(data.aws_ssm_parameter.eks_ami.value)
 }

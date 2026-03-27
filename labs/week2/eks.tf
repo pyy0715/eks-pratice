@@ -100,7 +100,7 @@ module "eks" {
       vpc_security_group_ids = [aws_security_group.node_group_sg.id]
 
       # SSM Parameter로 조회한 EKS-optimized AMI를 명시 지정 → Custom AMI 취급
-      ami_id                     = data.aws_ssm_parameter.eks_ami.value
+      ami_id                     = nonsensitive(data.aws_ssm_parameter.eks_ami.value)
       ami_type                   = "AL2023_x86_64_STANDARD"
       enable_bootstrap_user_data = true
 
@@ -152,15 +152,9 @@ module "eks" {
       most_recent = true
     }
     vpc-cni = {
-      most_recent    = true
-      before_compute = true
-      # Prefix Delegation 활성화 (2_ip-modes.md 참조)
-      configuration_values = jsonencode({
-        env = {
-          ENABLE_PREFIX_DELEGATION = "true"
-          WARM_PREFIX_TARGET       = "1"
-        }
-      })
+      most_recent          = true
+      before_compute       = true
+      configuration_values = "{}"
     }
   }
 
