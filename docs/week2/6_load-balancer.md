@@ -156,7 +156,7 @@ kubectl get pod <pod-name> -o jsonpath='{range .status.conditions[*]}{.type}: {.
 
 ---
 
-## ALB
+## ALB { #alb-ingress }
 
 HTTP/HTTPS 워크로드는 ALB를 사용합니다. ALB는 경로 기반 라우팅, SSL 종료, WAF 연동을 지원합니다. [VPC CNI](./1_vpc-cni.md) 환경에서는 Pod IP를 직접 타겟으로 등록하는 IP target type을 사용합니다.
 

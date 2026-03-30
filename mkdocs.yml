@@ -13,18 +13,19 @@ theme:
   features:
     - content.code.copy
     - content.code.annotate
-    # - content.code.select
-    # - content.footnote.tooltips
+    - content.code.select
+    - content.footnote.tooltips
     - content.tabs.link
     - content.tooltips
     # - header.autohide
     - navigation.expand
     - navigation.footer
     - navigation.indexes
-    # - navigation.instant
-    # - navigation.instant.prefetch
-    # - navigation.instant.progress
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     # - navigation.prune
+    - navigation.path
     - navigation.sections
     - navigation.tabs
     - navigation.tabs.sticky
@@ -85,6 +86,9 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.keys
@@ -103,6 +107,7 @@ markdown_extensions:
   - pymdownx.snippets:
       auto_append:
         - docs/_includes/abbreviations.md
+  - pymdownx.blocks.caption
 
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
