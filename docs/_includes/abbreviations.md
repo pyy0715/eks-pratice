@@ -12,4 +12,11 @@
 *[CG-NAT]: Carrier-Grade NAT — ISP가 공인 IP 부족을 해결하기 위해 운영하는 대규모 NAT로 100.64.0.0/10 대역을 사용하며 공인 인터넷에서 라우팅되지 않음
 
 *[ARP]: Address Resolution Protocol — IP 주소를 MAC 주소로 매핑하여 L2 통신을 가능하게 하는 프로토콜
+*[HPA]: Horizontal Pod Autoscaler — Pod 메트릭 기반으로 Deployment의 replica 수를 자동 조정하는 K8s 컨트롤러
+*[VPA]: Vertical Pod Autoscaler — Pod의 resource request/limit을 실제 사용량 기반으로 최적화하는 컨트롤러
+*[CAS]: Cluster Autoscaler — Pending Pod 발생 시 ASG를 통해 노드를 자동 추가/제거하는 K8s 컴포넌트
+*[CPA]: Cluster Proportional Autoscaler — 노드 수에 비례하여 특정 워크로드 replica를 자동 조정하는 컨트롤러
+*[KEDA]: Kubernetes Event-Driven Autoscaling — 이벤트 소스(큐, cron 등)를 기반으로 Pod를 스케일링하는 오픈소스 프로젝트
+*[ASG]: Auto Scaling Group — EC2 인스턴스를 자동으로 추가/제거하는 AWS 서비스
+*[KRR]: Kubernetes Resource Recommender — Prometheus 데이터 기반으로 Pod 리소스 추천값을 제공하는 CLI 도구
 *[RFC 3927]: IANA가 link-local 자동 주소 설정용으로 예약한 IPv4 주소 범위 (169.254.0.0/16). 라우팅 테이블에 전파되지 않아 VPC/Pod CIDR와 충돌하지 않음

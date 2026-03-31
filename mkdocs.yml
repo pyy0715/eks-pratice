@@ -141,3 +141,10 @@ nav:
       - Service Networking: week2/5_service-dns.md
       - Load Balancer Controller & ExternalDNS: week2/6_load-balancer.md
       - Lab: week2/8_lab.md
+  - Week 3:
+      - week3/index.md
+      - Scaling Overview: week3/1_scaling-overview.md
+      - HPA & VPA: week3/2_hpa-vpa.md
+      - Node Autoscaling: week3/3_node-autoscaling.md
+      - Fargate: week3/4_fargate.md
+      - Lab: week3/5_lab.md
