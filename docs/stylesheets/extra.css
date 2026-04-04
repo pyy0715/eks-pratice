@@ -1,0 +1,21 @@
+/* Table header visibility */
+.md-typeset table:not([class]) th {
+  border-bottom: .1rem solid var(--md-accent-fg-color);
+}
+
+/* Table border radius */
+.md-typeset table:not([class]) {
+  border-radius: .4rem;
+}
+
+/* Figure caption alignment */
+.md-typeset figure figcaption {
+  text-align: center;
+  font-size: .7rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Mermaid diagram centering */
+.md-typeset .mermaid {
+  text-align: center;
+}

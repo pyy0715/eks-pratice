@@ -1,6 +1,6 @@
 ---
 name: write-markdown
-description: "Structures MkDocs Material documents using PyMdown Extensions and Material features. Handles component selection (admonitions, tabs, collapsibles, def_list, code annotations, grids, Mermaid diagrams, captions, tooltips, and superfences). Use when writing or editing any .md file, restructuring markdown for readability, or choosing the right PyMdown component for content."
+description: "Structures MkDocs Material documents using PyMdown Extensions and Material features. Handles component selection (admonitions, tabs, collapsibles, def_list, code annotations, grids, Mermaid diagrams, captions, tooltips, superfences, math formulas, fancylists, interactive tasklists, and blocks framework). Use when writing or editing any .md file, restructuring markdown for readability, or choosing the right PyMdown component for content."
 ---
 
 # MkDocs Material Document Structuring
@@ -36,7 +36,9 @@ Ask: "What would a reader *do* with this information?"
 | **Background** — aids understanding, not required to act | History, rationale, theory, "why this works" | `???+ info` collapsible (open) |
 | **Parallel implementations** — same task, different envs | Steps repeated for different OS/language/tool | `=== "Tab"` tabs |
 | **Definitions** — term + what it means | Config keys, CLI flags, env vars, glossary | `def_list` |
-| **Completion state** — tasks done/not done | Checkable items, progress tracking | `- [x]` tasklist |
+| **Completion state** — static status display | Completed items, progress summary in prose | `- [x]` tasklist (static) |
+| **Runbook checklist** — reader checks off steps live | Pre-flight check, post-install verification, deployment steps | tasklist + `clickable_checkbox: true` |
+| **Multi-level procedure** — sub-steps need distinct numbering | Steps within a step, lettered options under a numbered item | FancyLists `i.` / `a.` |
 | **Extended detail** — supplementary, not critical path | "See also", full config dump, advanced options | `???` collapsible (closed) |
 | **Worked example** — code + explanation together | Code block immediately followed by explanation | `!!! example` with nested fence |
 | **Known issue** — documented broken behavior | "Currently X doesn't work", workaround | `!!! bug` |
@@ -45,7 +47,7 @@ Ask: "What would a reader *do* with this information?"
 | **3+ option comparison** — parallel choices to evaluate | Multiple approaches/tools/configs side by side | Grid cards (`attr_list` + `md_in_html`) |
 | **Architecture / flow** — process or data path | Request flow, bootstrap sequence, packet path | Mermaid `flowchart` or `sequenceDiagram` |
 | **Packet / frame structure** — binary layout | IP header, ENI slot layout, frame fields | Mermaid `packet-beta` |
-| **Formula / calculation** — numeric relationship | `MaxPods = ENI × (IPv4/ENI - 1) + 2` | Code block + `def_list` for variables. Avoid LaTeX |
+| **Formula / calculation** — numeric relationship | `MaxPods = ENI × (IPv4/ENI - 1) + 2` | `$...$` inline or `$$...$$` block via `arithmatex` + `def_list` for variables |
 | **Technical term (first use)** — reader may not know | Acronym, protocol name, AWS-specific concept | `abbr` via `abbreviations.md` (snippets auto_append) |
 | **Figure with caption** — image/table needs attribution | Diagram, architecture image, comparison table | `pymdownx.blocks.caption` for `<figure>` + `<figcaption>` |
 | **Keyboard / CLI interaction** — key combination | Ctrl+C, shortcut sequences | `pymdownx.keys` (`++ctrl+c++`) |
@@ -201,7 +203,17 @@ Flowchart start nodes must clearly state their scope:
 
 ```markdown
 /// figure-caption
-    attrs: {id: fig-eni-architecture}
+    attrs: {id: "fig-eni-architecture"}
+
+![ENI Architecture](../images/eni-arch.png)
+
+///
+```
+
+Or use the inline `|` shorthand (equivalent):
+
+```markdown
+/// figure-caption | #fig-eni-architecture
 
 ![ENI Architecture](../images/eni-arch.png)
 
@@ -229,13 +241,149 @@ Only add terms readers might not know. Skip obvious ones (VPC, CNI, IAM, EC2).
 
 With `content.footnote.tooltips` enabled, these render as hover tooltips.
 
-### Other components
+### Math formulas (`pymdownx.arithmatex`)
+
+**Inline** — two equivalent delimiters:
+```markdown
+$p(x|y) = \frac{p(y|x)p(x)}{p(y)}$
+\(p(x|y) = \frac{p(y|x)p(x)}{p(y)}\)
+```
+
+**Block** — three equivalent delimiters; must be surrounded by blank lines, no blank lines inside:
+```markdown
+$$
+E(\mathbf{v}, \mathbf{h}) = -\sum_{i,j}w_{ij}v_i h_j
+$$
+
+\[3 < 4\]
+
+\begin{align}
+    p(v_i=1|\mathbf{h}) & = \sigma\left(\sum_j w_{ij}h_j + b_i\right) \\
+    p(h_j=1|\mathbf{v}) & = \sigma\left(\sum_i w_{ij}v_i + c_j\right)
+\end{align}
+```
+
+**Alternative: fenced `math` block** (via SuperFences integration — cleaner for multi-line):
+
+~~~markdown
+```math
+\begin{align}
+    MaxPods &= N \times (P - 1) + 2
+\end{align}
+```
+~~~
+
+Pair with `def_list` for variable definitions:
+```markdown
+The maximum pods per node is $MaxPods = N \times (P - 1) + 2$, where:
+
+`N`
+:   Number of ENIs attached to the node.
+
+`P`
+:   Maximum IPv4 addresses per ENI.
+```
+
+**Gotchas:**
+- `smart_dollar` is enabled by default — opening `$` must NOT be followed by whitespace, closing `$` must NOT be preceded by whitespace. `$2.00` is safe (not treated as math).
+- Block math must have blank lines before and after; no blank lines inside the block.
+- KaTeX always requires `generic: true`. MathJax 3 also recommends it.
+- When using `generic: true`, do NOT configure your JS library to scan for `$` — let Arithmatex handle parsing, configure the library for `\(...\)` and `\[...\]` only.
+
+### Tasklist (`pymdownx.tasklist`)
+
+Two modes depending on reader intent:
+
+**Static** — completed/pending state shown in prose. Reader cannot interact.
+```markdown
+- [x] VPC CNI installed
+- [x] IAM role attached
+- [ ] CoreDNS verified
+```
+
+**Interactive runbook** — reader checks off steps as they work through them. Requires `clickable_checkbox: true` in config.
+```markdown
+- [ ] Confirm kubeconfig points to the right cluster
+- [ ] Verify node group is in Ready state
+- [ ] Apply the manifest and watch pod events
+```
+
+Use interactive mode for deployment runbooks, pre-flight checklists, lab exercises. Static mode for status summaries inside prose or admonitions.
+
+### Fancy lists (`pymdownx.fancylists`)
+
+Use when the same page needs distinct numbering schemes that must not visually merge.
+
+Supported markers:
 
 ```markdown
-# Tasklist
-- [x] Completed item
-- [ ] Pending item
+i.  First                  <!-- lowercase roman -->
+ii. Second
+iii. Third
 
+a.  Option alpha           <!-- lowercase alphabetical -->
+b.  Option beta
+
+1)  Parenthesis style      <!-- distinct from 1. dot decimal -->
+2)  Second item
+
+#.  Generic (inherits decimal if starting a new list)
+```
+
+**When to use:** multi-level procedures where top-level steps are `1.` and sub-options are `a.` or `i.` — makes nesting levels visually unambiguous without manual indentation hacks.
+
+**Gotchas:**
+- Single uppercase letter `A.` requires **two spaces** after the dot to avoid false positives (`B. Russell was...`)
+- A single letter `i` as the first item is treated as roman numeral, not alphabetical
+- If the MkDocs Material theme CSS overrides `list-style-type`, add `inject_style: true` to the config
+
+### Blocks framework (`pymdownx.blocks.*`)
+
+The `///` fence syntax is the alternative to indented admonitions when nesting depth exceeds two levels — no need to track 4-space indentation for each container.
+
+**Basic syntax:**
+```markdown
+/// note | Title here
+Content goes here.
+///
+```
+
+**With YAML options** (no blank line between fence header and options):
+```markdown
+/// details | Summary text
+    type: warning
+    open: true
+
+Content goes here.
+///
+```
+
+**Nested blocks** (outer fence uses more `/` tokens):
+```markdown
+//// note | Outer note
+
+/// details | Expand for detail
+    type: tip
+
+Inner content here.
+///
+
+Back in the outer note.
+////
+```
+
+**When to use `///` over `???+`:**
+- Nesting depth > 2 levels (indentation becomes error-prone)
+- Need to pass options like `type:` or `open:` declaratively
+- Mixing admonition + details + tab in one block
+
+**Gotcha:** YAML options must have **no blank line** between them and the fence opener — any blank line ends the options block and starts content.
+
+Sub-extensions available: `pymdownx.blocks.admonition`, `pymdownx.blocks.details`, `pymdownx.blocks.tab`, `pymdownx.blocks.caption` (already documented above).
+
+### Keyboard keys and inline highlight
+
+```markdown
 # Keyboard keys
 Press ++ctrl+c++ to cancel.
 
@@ -296,15 +444,27 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+        - name: math
+          class: arithmatex
+          format: !!python/object/apply:pymdownx.arithmatex.arithmatex_fenced_format
+            kwds:
+              mode: generic
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
       custom_checkbox: true
+      clickable_checkbox: false  # set true for interactive runbooks
+  - pymdownx.arithmatex:
+      generic: true  # required for KaTeX; recommended for MathJax 3
+  - pymdownx.fancylists:
+      inject_style: true  # needed if theme CSS overrides list-style-type
   - pymdownx.keys
   - pymdownx.snippets:
       auto_append:
         - docs/abbreviations.md
-  - pymdownx.blocks.caption  # for figure/table captions
+  - pymdownx.blocks.admonition  # /// note | Title (no-indentation admonitions)
+  - pymdownx.blocks.details     # /// details | Summary (with YAML options)
+  - pymdownx.blocks.caption     # figure + figcaption
 
 theme:
   features:

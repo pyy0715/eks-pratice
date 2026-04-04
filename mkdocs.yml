@@ -109,6 +109,9 @@ markdown_extensions:
         - docs/_includes/abbreviations.md
   - pymdownx.blocks.caption
 
+extra_css:
+  - stylesheets/extra.css
+
 extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
@@ -143,8 +146,8 @@ nav:
       - Lab: week2/8_lab.md
   - Week 3:
       - week3/index.md
-      - Scaling Overview: week3/1_scaling-overview.md
-      - HPA & VPA: week3/2_hpa-vpa.md
+      - Overview: week3/1_overview.md
+      - Pod Autoscaling: week3/2_pod-autoscaling.md
       - Node Autoscaling: week3/3_node-autoscaling.md
       - Fargate: week3/4_fargate.md
       - Lab: week3/5_lab.md

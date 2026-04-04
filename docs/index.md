@@ -7,8 +7,8 @@
 | Week | Topic |
 |------|-------|
 | 1 | [EKS Introdcution & Deploy](week1/index.md) |
-| 2 | EKS Netwokring |
-| 3 | EKS Compute & Scaling (Node Group, Spot, Karpenter, Fargate, HPA, KEDA)|
+| 2 | [EKS Netwokring](week2/index.md) |
+| 3 | [EKS Scaling](week3/index.md) |
 | 4 | EKS Security |
 | 5 | EKS Troubleshooting & Debugging|
 | 6 | CI/CD(ArgoCD(Gitea), kro, terraform, ArgoCD Capability) |
