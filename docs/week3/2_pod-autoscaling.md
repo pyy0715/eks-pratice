@@ -23,9 +23,7 @@ $$
 `averageUtilization`을 기준으로 사용하면 각 Pod의 `resources.requests` 대비 실제 사용률을 측정합니다. 예를 들어 requests가 200m이고 현재 사용량이 150m이면 utilization은 75%입니다.
 
 !!! warning
-    `resources.requests`가 설정되지 않으면 HPA는 utilization을 계산할 수 없어 스케일링이 동작하지 않습니다. `kubectl describe hpa`에서 `cpu: <unknown>/50%`로 표시됩니다.
-
-    반대로 실제 사용량보다 낮게 설정하면 utilization이 비정상적으로 높게 계산됩니다. 예를 들어 requests가 `10m`이고 실제 사용량이 `100m`이면 `100m / 10m = 1000%`가 되어 배포 직후 maxReplicas까지 확장합니다.
+    `resources.requests`가 설정되지 않으면 HPA는 utilization을 계산할 수 없어 스케일링이 동작하지 않습니다. `kubectl describe hpa`에서 `cpu: <unknown>/50%`로 표시됩니다. 반대로 실제 사용량보다 낮게 설정하면 utilization이 비정상적으로 높게 계산됩니다. 예를 들어 requests가 `10m`이고 실제 사용량이 `100m`이면 `100m / 10m = 1000%`가 되어 배포 직후 maxReplicas까지 확장합니다.
 
 ### Architecture
 

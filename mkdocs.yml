@@ -149,5 +149,5 @@ nav:
       - Overview: week3/1_overview.md
       - Pod Autoscaling: week3/2_pod-autoscaling.md
       - Node Autoscaling: week3/3_node-autoscaling.md
-      - Fargate: week3/4_fargate.md
-      - Lab: week3/5_lab.md
+      - Karpenter: week3/4_karpenter.md
+      # - Fargate: week3/5_fargate.md

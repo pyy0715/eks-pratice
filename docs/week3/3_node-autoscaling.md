@@ -82,7 +82,15 @@ CAS의 스케일 아웃 기준은 노드의 CPU 부하 평균이 아니라 **Pen
 
 ### Node Group Constraints
 
-CAS는 하나의 노드 그룹에 속한 인스턴스들이 동일한 리소스(vCPU, 메모리)를 가진다고 가정합니다. Managed Node Group도 생성 시 capacity type(On-Demand 또는 Spot)을 지정해야 하므로, On-Demand/Spot, Intel/Graviton, 인스턴스 사이즈별로 노드 그룹을 분리해야 합니다. 요구사항이 복잡해질수록 노드 그룹 수가 기하급수적으로 증가합니다.
+CAS는 하나의 노드 그룹에 속한 인스턴스들이 동일한 리소스(vCPU, 메모리)를 가진다고 가정합니다. Managed Node Group도 생성 시 capacity type(On-Demand 또는 Spot)을 지정해야 하므로, On-Demand/Spot, Intel/Graviton, 인스턴스 사이즈별로 노드 그룹을 분리해야 합니다. 요구사항이 복잡해질수록 노드 그룹 수가 기하급수적으로 증가합니다.[^cas-best-practices]
+
+[^cas-best-practices]: [AWS EKS Best Practices — Cluster Autoscaler](https://docs.aws.amazon.com/eks/latest/best-practices/cas.html)
+
+노드 그룹 구성 시 다음 원칙을 준수해야 CAS가 정확한 스케일링 판단을 내릴 수 있습니다.
+
+- 동일 Node Group 내 모든 노드는 동일한 labels, taints, allocatable 리소스를 가져야 합니다. CAS는 노드 그룹의 대표 노드 하나를 기준으로 스케줄링을 시뮬레이션하기 때문에, 노드 간 구성이 다르면 잘못된 스케일링 판단으로 이어질 수 있습니다.
+- ASG의 MixedInstancePolicies를 사용할 때는 CPU, Memory, GPU 스펙이 유사한 인스턴스 타입만 조합해야 합니다. 예를 들어 `c5.xlarge`(4 vCPU, 8 GiB)와 `c5.4xlarge`(16 vCPU, 32 GiB)를 같은 그룹에 혼용하면 CAS가 가용 리소스를 잘못 예측할 수 있습니다.
+- 많은 수의 소규모 Node Group보다 적은 수의 대규모 Node Group이 확장성에 유리합니다. CAS는 각 Node Group을 개별적으로 평가하므로 그룹 수가 많아질수록 스케일링 판단에 필요한 연산 비용도 함께 증가합니다.
 
 ![On-Demand/Spot + Intel/Graviton 조합에 따른 노드 그룹 구성](https://d2908q01vomqb2.cloudfront.net/2a459380709e2fe4ac2dae5733c73225ff6cfee1/2023/05/18/image-2-1024x818.png)
 *[Source: Amazon EKS 클러스터를 비용 효율적으로 오토스케일링하기](https://aws.amazon.com/ko/blogs/tech/amazon-eks-cluster-auto-scaling-karpenter-bp/)*
