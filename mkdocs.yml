@@ -151,3 +151,4 @@ nav:
       - Node Autoscaling: week3/3_node-autoscaling.md
       - Karpenter: week3/4_karpenter.md
       # - Fargate: week3/5_fargate.md
+      - Lab: week3/6_lab.md

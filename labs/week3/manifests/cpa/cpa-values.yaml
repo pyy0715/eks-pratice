@@ -1,0 +1,11 @@
+config:
+  ladder:
+    nodesToReplicas:
+      - [1, 1]
+      - [2, 2]
+      - [3, 3]
+      - [4, 3]
+      - [5, 5]
+options:
+  namespace: default
+  target: "deployment/nginx-deployment"

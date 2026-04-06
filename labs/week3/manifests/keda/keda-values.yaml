@@ -1,0 +1,20 @@
+metricsServer:
+  useHostNetwork: true
+prometheus:
+  metricServer:
+    enabled: true
+    port: 9022
+    portName: metrics
+    path: /metrics
+    serviceMonitor:
+      enabled: true
+  operator:
+    enabled: true
+    port: 8080
+    serviceMonitor:
+      enabled: true
+  webhooks:
+    enabled: true
+    port: 8020
+    serviceMonitor:
+      enabled: true
