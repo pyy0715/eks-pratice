@@ -54,7 +54,7 @@ prometheus:
   additionalRulesForClusterRole:
     - verbs: ["get"]
       apiGroups: ["metrics.eks.amazonaws.com"]
-      resources: ["kcm/metrics", "ksh/metrics"]
+      resources: ["kcm/metrics", "ksh/metrics", "etcd/metrics"]
   prometheusSpec:
     podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
@@ -101,6 +101,25 @@ prometheus:
         kubernetes_sd_configs:
         - role: endpoints
         metrics_path: /apis/metrics.eks.amazonaws.com/v1/kcm/container/metrics
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+        - source_labels:
+            [
+              __meta_kubernetes_namespace,
+              __meta_kubernetes_service_name,
+              __meta_kubernetes_endpoint_port_name,
+            ]
+          action: keep
+          regex: default;kubernetes;https
+      # etcd metrics
+      - job_name: etcd-metrics
+        kubernetes_sd_configs:
+        - role: endpoints
+        metrics_path: /apis/metrics.eks.amazonaws.com/v1/etcd/container/metrics
         scheme: https
         tls_config:
           ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
@@ -192,11 +211,23 @@ curl -s -o "$TMPDIR_DASH/keda-dashboard.json" \
   "https://raw.githubusercontent.com/kedacore/keda/main/config/grafana/keda-dashboard.json"
 sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/keda-dashboard.json"
 
+# Controller Manager dashboard (15761)
+curl -s -o "$TMPDIR_DASH/k8s-kcm.json" \
+  "https://grafana.com/api/dashboards/15761/revisions/1/download"
+sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/k8s-kcm.json"
+
+# Scheduler dashboard (15757)
+curl -s -o "$TMPDIR_DASH/k8s-scheduler.json" \
+  "https://grafana.com/api/dashboards/15757/revisions/1/download"
+sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/k8s-scheduler.json"
+
 kubectl delete configmap grafana-dashboards-custom -n monitoring --ignore-not-found
 kubectl create configmap grafana-dashboards-custom \
   --from-file="$TMPDIR_DASH/k8s-system-api-server.json" \
   --from-file="$TMPDIR_DASH/k8s-hpa.json" \
   --from-file="$TMPDIR_DASH/keda-dashboard.json" \
+  --from-file="$TMPDIR_DASH/k8s-kcm.json" \
+  --from-file="$TMPDIR_DASH/k8s-scheduler.json" \
   -n monitoring
 kubectl label configmap grafana-dashboards-custom grafana_dashboard="1" -n monitoring
 rm -rf "$TMPDIR_DASH"
