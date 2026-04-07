@@ -59,24 +59,7 @@ prometheus:
     podMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
     additionalScrapeConfigs:
-      # apiserver metrics
-      - job_name: apiserver-metrics
-        kubernetes_sd_configs:
-        - role: endpoints
-        scheme: https
-        tls_config:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-          insecure_skip_verify: true
-        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
-        relabel_configs:
-        - source_labels:
-            [
-              __meta_kubernetes_namespace,
-              __meta_kubernetes_service_name,
-              __meta_kubernetes_endpoint_port_name,
-            ]
-          action: keep
-          regex: default;kubernetes;https
+      # apiserver metrics는 kubeApiServer.serviceMonitor(내장)가 이미 수집
       # Scheduler metrics
       - job_name: ksh-metrics
         kubernetes_sd_configs:
@@ -96,6 +79,8 @@ prometheus:
             ]
           action: keep
           regex: default;kubernetes;https
+        - target_label: cluster
+          replacement: myeks
       # Controller Manager metrics
       - job_name: kcm-metrics
         kubernetes_sd_configs:
@@ -115,6 +100,8 @@ prometheus:
             ]
           action: keep
           regex: default;kubernetes;https
+        - target_label: cluster
+          replacement: myeks
       # etcd metrics
       - job_name: etcd-metrics
         kubernetes_sd_configs:
@@ -134,6 +121,8 @@ prometheus:
             ]
           action: keep
           regex: default;kubernetes;https
+        - target_label: cluster
+          replacement: myeks
 
   ingress:
     enabled: true
@@ -173,12 +162,31 @@ grafana:
       alb.ingress.kubernetes.io/group.name: study
       alb.ingress.kubernetes.io/ssl-redirect: '443'
 
+kubeApiServer:
+  serviceMonitor:
+    # 내장 apiserver scrape에 cluster 라벨 추가 → dashboard의 \$cluster 변수 매칭
+    relabelings:
+    - targetLabel: cluster
+      replacement: myeks
 kubeControllerManager:
-  enabled: false
+  enabled: true
+  # additionalScrapeConfigs의 kcm-metrics job과 일치시켜 내장 dashboard가 쿼리할 수 있게 함
+  jobNameOverride: "kcm-metrics"
+  # EKS는 kcm를 Pod로 노출하지 않으므로 service/serviceMonitor 비활성화
+  service:
+    enabled: false
+  serviceMonitor:
+    enabled: false
 kubeEtcd:
   enabled: false
 kubeScheduler:
-  enabled: false
+  enabled: true
+  # additionalScrapeConfigs의 ksh-metrics job과 일치
+  jobNameOverride: "ksh-metrics"
+  service:
+    enabled: false
+  serviceMonitor:
+    enabled: false
 prometheus-windows-exporter:
   prometheus:
     monitor:
@@ -194,10 +202,8 @@ helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheu
 echo "=== [3/3] Grafana dashboards ==="
 TMPDIR_DASH=$(mktemp -d)
 
-# API Server dashboard (15661)
-curl -sO --output-dir "$TMPDIR_DASH" \
-  https://raw.githubusercontent.com/dotdc/grafana-dashboards-kubernetes/refs/heads/master/dashboards/k8s-system-api-server.json
-sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/k8s-system-api-server.json"
+# API Server / Controller Manager / Scheduler dashboards는 kube-prometheus-stack 내장 대시보드를 사용
+# (kubeApiServer, kubeControllerManager, kubeScheduler Helm values로 자동 생성됨)
 
 # HPA dashboard (17125)
 # kube-state-metrics v2.17+ 에서 _labels 메트릭이 기본 비활성화되어 _metadata_generation 으로 대체
@@ -211,23 +217,13 @@ curl -s -o "$TMPDIR_DASH/keda-dashboard.json" \
   "https://raw.githubusercontent.com/kedacore/keda/main/config/grafana/keda-dashboard.json"
 sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/keda-dashboard.json"
 
-# Controller Manager dashboard (15761)
-curl -s -o "$TMPDIR_DASH/k8s-kcm.json" \
-  "https://grafana.com/api/dashboards/15761/revisions/1/download"
-sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/k8s-kcm.json"
-
-# Scheduler dashboard (15757)
-curl -s -o "$TMPDIR_DASH/k8s-scheduler.json" \
-  "https://grafana.com/api/dashboards/15757/revisions/1/download"
-sed -i'' -e 's/${DS_PROMETHEUS}/prometheus/g' "$TMPDIR_DASH/k8s-scheduler.json"
+# Controller Manager / Scheduler dashboards는 kube-prometheus-stack 내장 대시보드를 사용
+# (kubeControllerManager.enabled=true, kubeScheduler.enabled=true로 자동 생성)
 
 kubectl delete configmap grafana-dashboards-custom -n monitoring --ignore-not-found
 kubectl create configmap grafana-dashboards-custom \
-  --from-file="$TMPDIR_DASH/k8s-system-api-server.json" \
   --from-file="$TMPDIR_DASH/k8s-hpa.json" \
   --from-file="$TMPDIR_DASH/keda-dashboard.json" \
-  --from-file="$TMPDIR_DASH/k8s-kcm.json" \
-  --from-file="$TMPDIR_DASH/k8s-scheduler.json" \
   -n monitoring
 kubectl label configmap grafana-dashboards-custom grafana_dashboard="1" -n monitoring
 rm -rf "$TMPDIR_DASH"

@@ -81,14 +81,14 @@ da9d4c5c9bf4  amazon-k8s-cni:v1.21.1       "/app/aws-vpc-cni"  k8s://kube-system
 
 EKS에서만이 아니라 모든 Kubernetes 환경에서 파드가 생성될 때 가장 먼저 실행됩니다. EKS에서 특이한 점은 이 pause 컨테이너의 이미지가 `registry.k8s.io` 대신 AWS 공식 ECR(`602401143452.dkr.ecr.us-west-2.amazonaws.com/eks/pause`)에서 오고, containerd 설정의 `sandbox = "localhost/kubernetes/pause"`로 로컬 캐시에서 가져오도록 구성되어 있다는 것입니다.
 
-따라서 Pod가 생성될 때 가장 먼저 실행되는 컨테이너가 바로 `pause` 컨테이너이며, 이후 실제 애플리케이션 컨테이너(`coredns`, `kube-proxy`, `aws-node` 등)가 이 환경에 연결되어 동작합니다.
+따라서 Pod이 생성될 때 가장 먼저 실행되는 컨테이너가 바로 `pause` 컨테이너이며, 이후 실제 애플리케이션 컨테이너(`coredns`, `kube-proxy`, `aws-node` 등)가 이 환경에 연결되어 동작합니다.
 
 `aws-node`는 모든 노드에서 실행되는 DaemonSet으로, VPC CNI를 구성하는 핵심 컴포넌트입니다. [공식 문서](https://docs.aws.amazon.com/ko_kr/eks/latest/best-practices/vpc-cni.html#)에 따르면 VPC CNI는 두 가지 컴포넌트로 구성됩니다.
 
 - **CNI Binary** (`/opt/cni/bin/aws-cni`) — 노드 파일시스템에 위치하는 바이너리입니다. kubelet이 파드를 추가하거나 삭제할 때 직접 호출합니다. pause 컨테이너의 네트워크 네임스페이스에 veth pair를 연결하고 IP를 할당하는 실제 작업을 수행합니다.
 - **ipamd** (`aws-node` 컨테이너) — 노드에서 상시 실행되는 데몬입니다. ENI를 관리하고 IP Warm Pool을 유지합니다. CNI Binary가 파드에 IP를 요청하면 ipamd가 Warm Pool에서 꺼내 줍니다.
 
-한편, 실제 `aws-node` Pod를 확인해보면 컨테이너가 두 개입니다. 이는 VPC CNI 구성 요소 외에, EKS에서 추가로 제공하는 기능이 함께 포함되어 있기 때문입니다.
+한편, 실제 `aws-node` Pod을 확인해보면 컨테이너가 두 개입니다. 이는 VPC CNI 구성 요소 외에, EKS에서 추가로 제공하는 기능이 함께 포함되어 있기 때문입니다.
 
 ```bash
 kubectl get pod -n kube-system -l k8s-app=aws-node -o jsonpath='{.items[0].spec.containers[*].name}'
@@ -111,7 +111,7 @@ kubectl get pod -n kube-system -l k8s-app=aws-node -o jsonpath='{.items[0].spec.
 
 ### kubelet
 
-일반적인 Kubernetes에서는 컨트롤 플레인 구성 요소(kube-apiserver, etcd, kube-controller-manager, kube-scheduler)를 Static Pod로 관리합니다. Static Pod는 API Server를 거치지 않고 kubelet이 `manifests/` 디렉터리를 직접 감시하여 실행하는 파드입니다. API Server 자체가 Static Pod이기 때문에 API Server가 없는 상황에서도 kubelet이 직접 기동할 수 있어야 하므로 이 방식을 사용합니다.
+일반적인 Kubernetes에서는 컨트롤 플레인 구성 요소(kube-apiserver, etcd, kube-controller-manager, kube-scheduler)를 Static Pod으로 관리합니다. Static Pod은 API Server를 거치지 않고 kubelet이 `manifests/` 디렉터리를 직접 감시하여 실행하는 파드입니다. API Server 자체가 Static Pod이기 때문에 API Server가 없는 상황에서도 kubelet이 직접 기동할 수 있어야 하므로 이 방식을 사용합니다.
 
 하지만 EKS에서는 컨트롤 플레인이 AWS 관리 VPC에서 실행됩니다. 워커 노드 입장에서 API Server는 관리형 ENI를 통해 연결되는 외부 엔드포인트입니다. 따라서 워커 노드의 `manifests/` 디렉터리는 아래와 같이 비어 있습니다.
 

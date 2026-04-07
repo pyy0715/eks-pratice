@@ -1,6 +1,6 @@
 # Fargate
 
-EC2 기반 노드를 운영하면 AMI 업데이트, 보안 패치, 스케일링 설정을 운영자가 관리해야 합니다. Fargate는 이 전체를 AWS에 위임하여 Pod만 선언하면 실행 환경이 자동으로 프로비저닝되는 서버리스 모델입니다. 각 Pod는 Firecracker microVM으로 격리되어 커널, CPU, 메모리, ENI를 다른 Pod와 공유하지 않습니다.
+EC2 기반 노드를 운영하면 AMI 업데이트, 보안 패치, 스케일링 설정을 운영자가 관리해야 합니다. Fargate는 이 전체를 AWS에 위임하여 Pod만 선언하면 실행 환경이 자동으로 프로비저닝되는 서버리스 모델입니다. 각 Pod은 Firecracker microVM으로 격리되어 커널, CPU, 메모리, ENI를 다른 Pod과 공유하지 않습니다.
 
 [Week 1에서 다룬 Compute Types](../week1/2_data-plane.md)에서 Fargate의 위치를 확인할 수 있습니다.
 
@@ -66,7 +66,7 @@ flowchart TB
 
 ## Fargate Profile
 
-Fargate에서 Pod를 실행하려면 Fargate Profile을 정의해야 합니다.
+Fargate에서 Pod을 실행하려면 Fargate Profile을 정의해야 합니다.
 
 ### Components
 
@@ -74,10 +74,10 @@ Fargate에서 Pod를 실행하려면 Fargate Profile을 정의해야 합니다.
 : Fargate 인프라의 kubelet이 AWS API(ECR 이미지 풀 등)를 호출하기 위한 IAM 역할. RBAC에도 등록됨
 
 **Subnets**
-: Pod를 배포할 private 서브넷 ID. 공용 서브넷은 지원하지 않음
+: Pod을 배포할 private 서브넷 ID. 공용 서브넷은 지원하지 않음
 
 **Selectors**
-: Pod가 Fargate에서 실행되기 위한 매칭 조건. 네임스페이스(필수)와 레이블(선택)로 구성. 최대 5개 셀렉터. 와일드카드(`*`, `?`) 지원
+: Pod이 Fargate에서 실행되기 위한 매칭 조건. 네임스페이스(필수)와 레이블(선택)로 구성. 최대 5개 셀렉터. 와일드카드(`*`, `?`) 지원
 
 ### Profile Behavior
 
@@ -85,7 +85,7 @@ Fargate에서 Pod를 실행하려면 Fargate Profile을 정의해야 합니다.
 - 여러 프로필이 매칭되면 프로필 이름 알파벳 순으로 선택
 
 !!! warning "Profile deletion impact"
-    프로필을 삭제하면 해당 프로필로 실행 중인 모든 Pod가 중지되고 Pending 상태로 전환됩니다. 먼저 대체 프로필을 생성한 뒤 기존 프로필을 삭제하세요.
+    프로필을 삭제하면 해당 프로필로 실행 중인 모든 Pod이 중지되고 Pending 상태로 전환됩니다. 먼저 대체 프로필을 생성한 뒤 기존 프로필을 삭제하세요.
 
 ---
 
@@ -93,7 +93,7 @@ Fargate에서 Pod를 실행하려면 Fargate Profile을 정의해야 합니다.
 
 ### CPU and Memory
 
-Fargate는 노드당 하나의 Pod만 실행하므로 리소스 부족으로 인한 퇴출이 발생하지 않습니다. 모든 Fargate Pod는 Guaranteed QoS로 실행되며, requests와 limits가 동일해야 합니다.
+Fargate는 노드당 하나의 Pod만 실행하므로 리소스 부족으로 인한 퇴출이 발생하지 않습니다. 모든 Fargate Pod은 Guaranteed QoS로 실행되며, requests와 limits가 동일해야 합니다.
 
 Fargate는 Pod의 vCPU와 메모리 요청 합계를 다음 조합 중 가장 가까운 값으로 반올림합니다:
 
@@ -164,7 +164,7 @@ data:
 
 AWS가 주기적으로 Fargate 노드에 OS 패치를 적용합니다. PDB(Pod Disruption Budget)로 동시 감소 Pod 수를 제어할 수 있습니다.
 
-- Eviction API로 Pod를 안전하게 배출
+- Eviction API로 Pod을 안전하게 배출
 - 퇴거 실패 시 EventBridge 이벤트 발생 (`EKS Fargate Pod Scheduled Termination`)
 - 예정된 종료 시간 전에 수동 재시작으로 선제 대응 가능
 

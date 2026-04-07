@@ -32,3 +32,27 @@ output "configure_kubectl" {
   description = "Configure kubectl command"
   value       = "aws eks update-kubeconfig --name ${module.eks.cluster_name} --region ${var.TargetRegion}"
 }
+
+########################
+# Karpenter outputs
+########################
+
+output "karpenter_controller_iam_role_name" {
+  description = "IAM role name assumed by the Karpenter controller pod via Pod Identity"
+  value       = module.karpenter.iam_role_name
+}
+
+output "karpenter_node_iam_role_name" {
+  description = "IAM role name attached to Karpenter-provisioned nodes"
+  value       = module.karpenter.node_iam_role_name
+}
+
+output "karpenter_queue_name" {
+  description = "SQS queue name for Karpenter interruption handling"
+  value       = module.karpenter.queue_name
+}
+
+output "karpenter_service_account" {
+  description = "Service account name used by Karpenter controller (Pod Identity association)"
+  value       = "karpenter"
+}

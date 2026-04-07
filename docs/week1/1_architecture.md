@@ -22,4 +22,4 @@ EKS 클러스터를 생성하면 내부적으로 **두 개의 VPC**가 관여합
 두 VPC는 AWS가 고객 VPC 안에 생성하는 관리형 ENI(Elastic Network Interface)를 통해 연결됩니다. `kubectl`로 명령을 실행하면 요청은 EKS API 엔드포인트(`*.gr7.*.eks.amazonaws.com`)를 통해 AWS 관리 VPC의 API Server에 도달하고, API Server는 이 ENI를 통해 고객 VPC의 워커 노드와 통신합니다.
 
 !!! note
-    EKS에서는 컨트롤 플레인 전체가 AWS 관리 VPC 안에 있어 `kubectl get pod -n kube-system`으로 API Server나 etcd Pod가 조회되지 않습니다.
+    EKS에서는 컨트롤 플레인 전체가 AWS 관리 VPC 안에 있어 `kubectl get pod -n kube-system`으로 API Server나 etcd Pod이 조회되지 않습니다.

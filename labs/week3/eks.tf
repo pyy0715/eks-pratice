@@ -8,7 +8,8 @@ resource "aws_security_group" "node_group_sg" {
   vpc_id      = module.vpc.vpc_id
 
   tags = {
-    Name = "${var.ClusterBaseName}-node-group-sg"
+    Name                     = "${var.ClusterBaseName}-node-group-sg"
+    "karpenter.sh/discovery" = var.ClusterBaseName
   }
 }
 
@@ -44,6 +45,13 @@ module "eks" {
 
   # Optional: Adds the current caller identity as an administrator via cluster access entry
   enable_cluster_creator_admin_permissions = true
+
+  # Karpenter가 프로비저닝하는 노드가 올바른 egress 경로(EKS API, ECR 등)를 갖도록
+  # 모듈이 생성한 node security group에 discovery 태그를 추가
+  # EC2NodeClass.securityGroupSelectorTerms가 이 SG를 선택하게 됨
+  node_security_group_tags = {
+    "karpenter.sh/discovery" = var.ClusterBaseName
+  }
 
   # EKS Managed Node Group(s)
   eks_managed_node_groups = merge(
@@ -227,6 +235,10 @@ module "eks" {
         txtOwnerId = var.ClusterBaseName
         policy     = "sync"
       })
+    }
+    # Karpenter controller가 Pod Identity로 AWS API를 호출하려면 필요
+    eks-pod-identity-agent = {
+      most_recent = true
     }
   }
 

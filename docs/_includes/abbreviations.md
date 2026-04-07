@@ -15,5 +15,5 @@
 *[ARP]: Address Resolution Protocol — IP 주소를 MAC 주소로 매핑하여 L2 통신을 가능하게 하는 프로토콜
 *[CAS]: Cluster Autoscaler — Pending Pod 발생 시, ASG를 통해 노드를 자동 추가/제거하는 K8s 컴포넌트
 *[CPA]: Cluster Proportional Autoscaler — 노드 수에 비례하여 특정 워크로드 replica를 자동 조정하는 컨트롤러
-*[KEDA]: Kubernetes Event-Driven Autoscaling — 이벤트 소스(큐, cron 등)를 기반으로 Pod를 스케일링하는 오픈소스 프로젝트
+*[KEDA]: Kubernetes Event-Driven Autoscaling — 이벤트 소스(큐, cron 등)를 기반으로 Pod을 스케일링하는 오픈소스 프로젝트
 *[KRR]: Kubernetes Resource Recommender — Prometheus 데이터 기반으로 Pod 리소스 추천값을 제공하는 CLI 도구
