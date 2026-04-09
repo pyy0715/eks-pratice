@@ -152,3 +152,10 @@ nav:
       - Karpenter: week3/4_karpenter.md
       # - Fargate: week3/5_fargate.md
       - Lab: week3/6_lab.md
+  - Week 4:
+      - week4/index.md
+      - Background: week4/0_background.md
+      - Overview: week4/1_overview.md
+      - Operator Authentication: week4/2_operator-auth.md
+      - Kubernetes RBAC: week4/3_rbac.md
+      - Pod Workload Identity: week4/4_pod-workload-identity.md
