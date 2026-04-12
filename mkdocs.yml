@@ -158,3 +158,4 @@ nav:
       - Operator Authentication and Authorization: week4/2_operator-auth.md
       - Kubernetes RBAC: week4/3_rbac.md
       - Pod Workload Identity: week4/4_pod-workload-identity.md
+      - Lab: week4/5_lab.md

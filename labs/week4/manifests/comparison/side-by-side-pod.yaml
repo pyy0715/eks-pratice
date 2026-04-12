@@ -1,0 +1,25 @@
+# IRSA와 Pod Identity를 동시에 배포하여 환경변수, 토큰 경로, Trust Policy 비교
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: irsa-compare
+  namespace: default
+spec:
+  serviceAccountName: s3-irsa-sa
+  containers:
+    - name: aws-cli
+      image: amazon/aws-cli:latest
+      command: ["sleep", "3600"]
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-identity-compare
+  namespace: default
+spec:
+  serviceAccountName: s3-pod-identity-sa
+  containers:
+    - name: aws-cli
+      image: amazon/aws-cli:latest
+      command: ["sleep", "3600"]
