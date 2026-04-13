@@ -9,12 +9,20 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 export VPC_ID=$(aws eks describe-cluster --name "$CLUSTER_NAME" \
   --query "cluster.resourcesVpcConfig.vpcId" --output text)
 
+# terraform output은 state가 있는 디렉토리 기준으로 실행
+# bash: BASH_SOURCE, zsh: source 시 $0이 스크립트 경로
+if [ -n "${BASH_VERSION:-}" ]; then
+  TF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  TF_DIR="$(cd "$(dirname "$0")" && pwd)"
+fi
+
 # Identity-specific exports
-export IRSA_S3_ROLE_ARN=$(terraform output -raw irsa_s3_role_arn)
-export POD_IDENTITY_S3_ROLE_ARN=$(terraform output -raw pod_identity_s3_role_arn)
-export S3_BUCKET=$(terraform output -raw s3_test_bucket)
-export VIEWER_ROLE_ARN=$(terraform output -raw viewer_role_arn)
-export LBC_IRSA_ROLE_ARN=$(terraform output -raw lbc_irsa_role_arn)
+export IRSA_S3_ROLE_ARN=$(terraform -chdir="$TF_DIR" output -raw irsa_s3_role_arn)
+export POD_IDENTITY_S3_ROLE_ARN=$(terraform -chdir="$TF_DIR" output -raw pod_identity_s3_role_arn)
+export S3_BUCKET=$(terraform -chdir="$TF_DIR" output -raw s3_test_bucket)
+export VIEWER_ROLE_ARN=$(terraform -chdir="$TF_DIR" output -raw viewer_role_arn)
+export LBC_IRSA_ROLE_ARN=$(terraform -chdir="$TF_DIR" output -raw lbc_irsa_role_arn)
 export OIDC_ISSUER=$(aws eks describe-cluster --name "$CLUSTER_NAME" \
   --query "cluster.identity.oidc.issuer" --output text)
 

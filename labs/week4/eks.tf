@@ -38,8 +38,14 @@ module "eks" {
   endpoint_public_access  = true
   endpoint_private_access = true
 
-  # Authenticator 로그 활성화 — CloudWatch에서 TokenReview 관찰
-  enabled_log_types = ["authenticator"]
+  # Control Plane 로그 활성화 — CloudWatch에서 API 호출, 스케줄링, 인증 등 관찰
+  enabled_log_types = [
+    "api",
+    "scheduler",
+    "authenticator",
+    "controllerManager",
+    "audit"
+  ]
 
   # API-only 모드: Access Entry만 사용, ConfigMap 비활성
   authentication_mode = "API"
@@ -72,7 +78,7 @@ module "eks" {
       max_size        = var.WorkerNodeCount + 2
       min_size        = 1
       disk_size       = var.WorkerNodeVolumesize
-      subnets         = module.vpc.private_subnets
+      subnet_ids      = module.vpc.private_subnets
 
       vpc_security_group_ids = [aws_security_group.node_group_sg.id]
 

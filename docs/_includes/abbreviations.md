@@ -15,7 +15,6 @@
 
 <!-- Kubernetes primitives -->
 *[SA]: ServiceAccount — 클러스터 내 워크로드의 K8s 신원
-*[RBAC]: Role-Based Access Control — Role/RoleBinding으로 주체에 권한을 부여하는 K8s 인가 방식
 *[PDB]: Pod Disruption Budget — 자발적 중단 시 최소 가용 Pod 수를 보장하는 정책
 *[SAR]: SubjectAccessReview — 특정 주체가 특정 action을 수행할 수 있는지 K8s API 서버에 질의하는 리소스
 *[TR]: TokenReview — 특정 토큰이 유효한지 K8s API 서버에 질의하는 리소스
@@ -29,7 +28,6 @@
 <!-- AWS services & integrations -->
 *[LBC]: AWS Load Balancer Controller — K8s Service/Ingress를 AWS NLB/ALB와 연동하는 컨트롤러
 *[IMDS]: Instance Metadata Service — EC2 인스턴스 내부에서 자격 증명과 메타데이터를 제공하는 169.254.169.254 서비스
-*[IRSA]: IAM Roles for Service Accounts — OIDC Federation으로 K8s ServiceAccount에 AWS IAM Role을 바인딩하는 메커니즘
 
 <!-- Auth protocols & tokens -->
 *[JWKS]: JSON Web Key Set — JWT 서명 검증용 공개키 집합. 보통 OIDC Provider의 `/keys` 경로에 노출

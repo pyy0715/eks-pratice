@@ -28,8 +28,6 @@ resource "aws_iam_policy" "s3_test_policy" {
 ########################
 # IRSA: S3 Access Role
 ########################
-# raw aws_iam_role — OIDC trust policy를 명시적으로 노출하여 학습 효과 극대화
-# terraform-aws-modules/iam 모듈은 trust policy를 추상화하므로 사용하지 않음
 
 resource "aws_iam_role" "irsa_s3" {
   name = "${var.ClusterBaseName}-irsa-s3-role"
@@ -140,6 +138,19 @@ resource "aws_iam_role" "viewer_role" {
       Effect    = "Allow"
       Principal = { AWS = data.aws_caller_identity.current.arn }
       Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "viewer_eks_describe" {
+  name = "eks-describe-cluster"
+  role = aws_iam_role.viewer_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "eks:DescribeCluster"
+      Resource = "arn:aws:eks:${var.TargetRegion}:${data.aws_caller_identity.current.account_id}:cluster/${var.ClusterBaseName}"
     }]
   })
 }
