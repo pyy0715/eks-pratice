@@ -75,17 +75,7 @@ Do NOT:
 
 </selection_principles>
 
-### Produce analysis summary before rewriting
-
-```
-Analysis:
-- L12-15: irreversible operation → !!! danger
-- L23: .env recommendation → !!! tip
-- L40-80: OAuth background → ???+ info (collapsible)
-- L90-130: Python/JS same structure → tabs
-- L145-160: CLI flags → def_list
-- L200-220: YAML manifest → code annotations
-```
+Classify each block internally. Do not output the analysis — proceed directly to Step 3.
 
 ---
 
@@ -417,9 +407,7 @@ Use `#!python def main():` as the entry point.
 
 ## Step 5 — Output format
 
-1. **Analysis summary** — classification decisions (Step 2 format)
-2. **Full rewritten .md file**
-3. **Change log** — 3-5 bullets: what changed and why
+Output the full rewritten `.md` file directly. No analysis summary, no change log.
 
 If mkdocs.yml is missing required extensions, note which ones to add.
 

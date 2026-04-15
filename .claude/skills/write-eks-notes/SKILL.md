@@ -135,8 +135,6 @@ Apply `write-markdown` skill rules for component selection.
 Path: `docs/week{N}/eks-week{N}-{topic}.md`
 
 ```
-> Cloudnet@EKS Week{N}
-
 # Introduction
 [Opens with "pain without it" — what operators handle manually.
 Introduces the solution as the answer.]
@@ -187,87 +185,50 @@ wrong configurations.
 ## Korean Tech Writing Style
 
 Output: Korean prose body + English section headers.
-These rules prevent common readability problems in Korean technical documents.
 
-### Scope declaration
+### Hard rules — enforce while writing, not in a later review pass
 
-When content applies only to a specific configuration (Managed Node Group,
-self-managed, AL2, AL2023, etc.), state the scope in the first sentence.
-Readers who discover non-applicability only at the end lose trust.
+**Style & Tone**
+- All sentence-ending verbs: polite form (~합니다, ~됩니다, ~입니다). Plain forms (~한다, ~된다) only in subordinate clauses (~다는, ~다면, ~다고).
+- No quoted Korean phrases in prose: ~~"결제 API가 5xx를 뱉는다"에서 시작해~~ → 결제 API 5xx 증상에서 시작해
+- No exaggerated superlatives: 가장 빠른, 최고의, ~이 핵심입니다, ~이 포인트입니다
+- No dramatic metaphors: 줄타기를 하게 됩니다, 범용 해법, 어디서나 동작
 
-Flowchart start nodes must name the target explicitly:
-- Good: `MNG node (AL2023) starts`
-- Bad: `Node Bootstrap`
+**Terminology**
+- Official terms as-is: Pod, ENI, DaemonSet, kubelet, Managed Node Group, bootstrapping
+- No "주입" — use 설정됩니다, 추가됩니다, 적용됩니다
+- Korean particles on English words follow consonant/vowel of the word's last sound:
+  - Pod (받침 있음): Pod이, Pod을, Pod은, Pod으로 — NOT Pod가, Pod를, Pod는, Pod로
 
-Also state what is NOT covered (e.g., "self-managed node group은 별도 bootstrap script 사용").
+**Formatting**
+- No interpunct (·) separators: ~~Service·EndpointSlice~~ → Service, EndpointSlice
+- Admonition titles always in English: `!!! tip "English Title"`
+- Table headers always in English
+- No `> Cloudnet@EKS Week{N}` attribution lines
+- Design rationale woven into prose — not in separate `!!! note "설계 의도"` boxes
 
-### Expression principles
-
-- Embed design rationale into prose flow — do not separate into callout boxes
-- Use official AWS/K8s terms as-is: Pod, ENI, Managed Node Group, DaemonSet, kubelet, bootstrapping
-- First use of technical abbreviations: include full name — e.g., CEL(Common Expression Language)
-- No content duplication across files — one file is the single source
-- When a concept from a prior page appears, link to it and weave context into the sentence
-
-### Patterns to avoid
-
-These patterns reduce readability in Korean tech docs:
-
-| Pattern | Why it's bad | Alternative |
-|---------|-------------|-------------|
-| Interpunct enumeration: `Service·EndpointSlice` | Relationship between items unclear | `A와 B`, `A, B, C` |
-| Design intent in separate callout box | Breaks reading flow | Integrate into prose |
-| Coined compounds: "강제 상한", "주입값" | Meaning is ambiguous | AWS official term or specific number/verb |
-| Abstract translation: "노드 초기화" | Loses original meaning | Use source term (node bootstrapping) |
-| Marketing phrasing: "범용 해법", "어디서나 동작" | Vague, unhelpful | State specific conditions and constraints |
-| Vague scope: "Pod 밀도가 높은 경우" | Too abstract to act on | "노드당 Pod 수가 많아 IP 소진이 빠른 경우" |
+**Scope**
+- State scope in the first sentence when content applies only to MNG, self-managed, AL2, AL2023, etc.
+- Concrete language: ~~"Pod 밀도가 높은 경우"~~ → "노드당 Pod 수가 많아 IP 소진이 빠른 경우"
 
 </writing_style>
 
-<examples>
-
-## Before / After
-
-**Design rationale separated vs integrated:**
-
-```markdown
-<!-- BEFORE -->
-Prefix Delegation은 /28 단위로 IP를 할당합니다.
-
-!!! note "설계 의도: 왜 /28인가?"
-    ENI당 슬롯 수 제한을 우회하면서 IP 낭비를 최소화하기 위해서입니다.
-
-<!-- AFTER -->
-Prefix Delegation은 ENI당 슬롯 수 제한을 우회하면서 IP 낭비를 줄이기 위해
-/28(16개 IP) 단위로 할당한다.
-```
-
-**Vague scope vs explicit scope:**
-
-```markdown
-<!-- BEFORE -->
-## Node Bootstrap
-노드가 시작되면 kubelet이 ...
-
-<!-- AFTER -->
-## Node Bootstrap (Managed Node Group, AL2023)
-Managed Node Group의 AL2023 노드가 시작되면 nodeadm이 ...
-self-managed node group은 별도의 bootstrap script를 사용한다.
-```
-
-</examples>
-
 ## Checklist
+
+Run mentally before saving the file — these must all pass without a separate review cycle:
 
 - [ ] No content dropped from staging
 - [ ] Duplicate concepts merged
 - [ ] Facts verified against AWS docs
 - [ ] Image candidates presented; selected images inserted with attribution
-- [ ] Sections without images have TODO placeholders
-- [ ] Counterintuitive decisions include Why explanation
 - [ ] 3+ options use comparison table, tabs, or grid cards
 - [ ] Config keys / env vars use def_list
 - [ ] Cross-references to prior weeks; no re-explanation
-- [ ] Hands-on included only where meaningful
-- [ ] Lab scripts in `labs/week{N}/`, referenced by relative link
 - [ ] Staging file archived
+- [ ] All sentence endings: ~합니다/됩니다/입니다 (no plain ~다 in body text)
+- [ ] No quoted Korean conversational phrases in prose
+- [ ] No interpunct (·) separators
+- [ ] No `> Cloudnet@EKS` attribution line
+- [ ] Table headers in English
+- [ ] Admonition titles in English
+- [ ] Pod이/Pod을/Pod은/Pod으로 (not 가/를/는/로)
