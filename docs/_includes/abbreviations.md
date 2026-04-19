@@ -28,6 +28,7 @@
 <!-- AWS services & integrations -->
 *[LBC]: AWS Load Balancer Controller — K8s Service/Ingress를 AWS NLB/ALB와 연동하는 컨트롤러
 *[IMDS]: Instance Metadata Service — EC2 인스턴스 내부에서 자격 증명과 메타데이터를 제공하는 169.254.169.254 서비스
+*[NMA]: Node Monitoring Agent — EKS 노드에 DaemonSet으로 설치되어 kubelet, containerd, CNI, dmesg 로그와 상태를 감시하고 NodeCondition으로 이상을 노출하는 add-on
 
 <!-- Auth protocols & tokens -->
 *[JWKS]: JSON Web Key Set — JWT 서명 검증용 공개키 집합. 보통 OIDC Provider의 `/keys` 경로에 노출

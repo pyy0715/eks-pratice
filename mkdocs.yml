@@ -161,8 +161,7 @@ nav:
       - Lab: week4/5_lab.md
   - Week 5:
       - week5/index.md
-      - Debugging Methodology: week5/1_debugging-methodology.md
-      - Common Failures: week5/2_common-failures.md
-      - Node Health and AZ Failures: week5/3_node-health-and-az.md
-      - Availability and Scale: week5/4_availability-and-scale.md
-      - Observability and AIOps: week5/5_observability-and-aiops.md
+      - Common Failures: week5/1_common-failures.md
+      - Node Health and AZ: week5/2_node-health-and-az.md
+      - Availability and Scale: week5/3_availability-and-scale.md
+      - Observability and AIOps: week5/4_observability-and-aiops.md

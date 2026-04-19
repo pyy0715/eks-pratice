@@ -1,6 +1,6 @@
 ---
 name: review
-description: "Post-editing verification checklist for Korean EKS documentation. Checks writing style, terminology, expressions, and factual accuracy against established rules. Use after writing or editing any .md file in docs/, or when the user asks to review a document."
+description: "Post-editing verification checklist for Korean EKS documentation. Checks writing style, terminology, expressions, and factual accuracy against established rules. MUST invoke AFTER every Write or Edit on any .md file under docs/ — per file, not once per turn. Running review only when the user asks is a rule violation; it is a mandatory step of the writing workflow. Also required when the user explicitly asks to review or verify a document."
 ---
 
 # Document Review Checklist

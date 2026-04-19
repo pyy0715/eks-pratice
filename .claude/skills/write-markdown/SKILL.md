@@ -1,6 +1,6 @@
 ---
 name: write-markdown
-description: "Structures MkDocs Material documents using PyMdown Extensions and Material features. Handles component selection (admonitions, tabs, collapsibles, def_list, code annotations, grids, Mermaid diagrams, captions, tooltips, superfences, math formulas, fancylists, interactive tasklists, and blocks framework). Use when writing or editing any .md file, restructuring markdown for readability, or choosing the right PyMdown component for content."
+description: "Structures MkDocs Material documents using PyMdown Extensions and Material features. Handles component selection (admonitions, tabs, collapsibles, def_list, code annotations, grids, Mermaid diagrams, captions, tooltips, superfences, math formulas, fancylists, interactive tasklists, and blocks framework). MUST invoke BEFORE every Write or Edit call that touches any .md file — this includes each individual file in a multi-file task (re-invoke per file, not once per turn). Skipping invocation on sequential edits is a rule violation. Also required when restructuring markdown for readability or choosing the right PyMdown component."
 ---
 
 # MkDocs Material Document Structuring

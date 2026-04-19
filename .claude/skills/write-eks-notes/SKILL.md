@@ -1,6 +1,6 @@
 ---
 name: write-eks-notes
-description: "Organizes EKS study notes into verified technical documents. Validates facts against AWS official docs, enriches with design rationale, cross-links weekly documents, and applies Korean tech writing standards. Use when drafting or editing EKS documentation pages, or when the user shares EKS study content to be organized into docs. Not for simple EKS Q&A or troubleshooting."
+description: "Organizes EKS study notes into verified technical documents. Validates facts against AWS official docs, enriches with design rationale, cross-links weekly documents, and applies Korean tech writing standards. MUST invoke at the start of any EKS documentation task and whenever the scope expands (new file, new topic, restructuring). Invoke write-markdown before EACH Write/Edit on .md files, and invoke review after EACH file edit — neither is optional. Not for simple EKS Q&A or troubleshooting."
 ---
 
 # EKS Technical Document Writer
