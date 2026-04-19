@@ -10,7 +10,7 @@
 | 2 | [EKS Netwokring](week2/index.md) |
 | 3 | [EKS Scaling](week3/index.md) |
 | 4 | [EKS AuthN/AuthZ](week4/index.md) |
-| 5 | EKS Troubleshooting & Debugging|
+| 5 | EKS Troubleshooting & Debugging(week5/index.md)|
 | 6 | CI/CD(ArgoCD(Gitea), kro, terraform, ArgoCD Capability) |
 | 7 | EKS Upgrade |
 | 8 | EKS Automation & Operations (Auto Mode, AgentOps) |
