@@ -1,0 +1,35 @@
+# CAS 스케일 트리거용 워크로드
+# requests 합이 기존 ng-cas 노드 잔여 용량을 초과해야 Pending → CAS가 ASG desired 증가
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cas-scaleout
+  namespace: default
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: cas-scaleout
+  template:
+    metadata:
+      labels:
+        app: cas-scaleout
+    spec:
+      # ng-system 은 k8s.io/cluster-autoscaler 태그가 없어 CAS가 관리하지 않음.
+      # ng-cas 에만 배치되도록 nodeSelector 사용하지 않고 taint 도 두지 않음 (양쪽 다 가능).
+      # 실제 스케일은 requests 로 유도.
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: role
+                    operator: NotIn
+                    values: ["system"]
+      containers:
+        - name: pause
+          image: public.ecr.aws/eks-distro/kubernetes/pause:3.7
+          resources:
+            requests:
+              cpu: 800m
+              memory: 800Mi

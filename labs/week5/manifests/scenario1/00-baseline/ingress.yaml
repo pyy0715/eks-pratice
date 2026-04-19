@@ -1,0 +1,28 @@
+# 기존 상태 — ALB Ingress 단독 운영
+# 적용 전 envsubst 또는 수동으로 ${MyDomain}, ${CERT_ARN} 치환
+# (cat ingress.yaml | envsubst | kubectl apply -f -)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx
+  namespace: demo
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: ${CERT_ARN}
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    external-dns.alpha.kubernetes.io/hostname: nginx.${MyDomain}
+spec:
+  ingressClassName: alb
+  rules:
+    - host: nginx.${MyDomain}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80

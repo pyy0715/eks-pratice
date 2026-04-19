@@ -1,0 +1,21 @@
+# 정상 HTTPRoute — Gateway "demo-gw" 의 https listener 에 attach
+# 마이그레이션 20-migration 단계에서 사용하는 기준 HTTPRoute 매니페스트
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: nginx
+  namespace: demo
+spec:
+  parentRefs:
+    - name: demo-gw
+      sectionName: https
+  hostnames:
+    - gw.${MyDomain}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: nginx
+          port: 80

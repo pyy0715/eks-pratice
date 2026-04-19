@@ -10,3 +10,4 @@
 - [Node Health and AZ](2_node-health-and-az.md) — NMA, Auto Repair, Zonal Shift, Karpenter
 - [Availability and Scale](3_availability-and-scale.md) — ALB 무중단 배포, Pod Identity vs IRSA, Ultra Scale
 - [Observability and AIOps](4_observability-and-aiops.md) — Container Insights, 알림 설계, DevOps Agent
+- [Lab](5_lab.md) — Ingress→Gateway API, CAS→Karpenter 마이그레이션 incident 사례와 재현 절차

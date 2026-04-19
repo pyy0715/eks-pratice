@@ -1,0 +1,17 @@
+# EC2NodeClass — Karpenter가 프로비저닝할 인스턴스의 네트워크/AMI 정의
+# subnet / security group 은 VPC/SG 의 karpenter.sh/discovery 태그로 자동 검색
+# 적용: envsubst < ec2nodeclass-default.yaml | kubectl apply -f -
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  role: "KarpenterNodeRole-${CLUSTER_NAME}"
+  amiSelectorTerms:
+    - alias: "al2023@latest"
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "${CLUSTER_NAME}"

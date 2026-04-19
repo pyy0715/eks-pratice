@@ -1,0 +1,34 @@
+# ALB GatewayClass + Gateway (AWS Load Balancer Controller v2.14.0+ Gateway API GA)
+# 적용: envsubst < gatewayclass-alb.yaml | kubectl apply -f -
+#
+# TLS: LBC는 certificateRefs(Secret)를 지원하지 않음.
+#   대신 listener hostname으로 ACM 인증서를 자동 탐색합니다.
+#   prerequisite: ACM에 *.${MyDomain} wildcard 인증서가 존재해야 합니다.
+#   https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/guide/gateway/gateway/
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: alb
+spec:
+  controllerName: ingress.k8s.aws/alb
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: demo-gw
+  namespace: demo
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: gw.${MyDomain}
+spec:
+  gatewayClassName: alb
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: gw.${MyDomain}
+      tls:
+        mode: Terminate
+        # certificateRefs 생략 — LBC가 ACM에서 hostname 매칭으로 인증서 자동 탐색
+      allowedRoutes:
+        namespaces:
+          from: Same

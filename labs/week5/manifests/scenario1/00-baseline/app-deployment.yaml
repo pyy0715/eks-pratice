@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+  labels:
+    # Ingress 기반 워크로드에 Pod Readiness Gate 조건을 자동으로 추가하도록 요청하는 label.
+    # AWS LBC v2.14.0+ 에서 Gateway API 워크로드에도 주입되는지는 공식 문서에 명시되지 않으므로
+    # 설치 후 실제 Pod spec 의 readinessGates 배열로 확인해야 한다.
+    elbv2.k8s.aws/pod-readiness-gate-inject: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      # SIGTERM 핸들러, preStop sleep, 긴 terminationGracePeriodSeconds 가 함께 있어야
+      # ALB deregister 전파 지연 구간에서 5xx 가 발생하지 않는다. Ingress 시절 구성.
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: nginx
+          image: public.ecr.aws/nginx/nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 30"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: demo
+spec:
+  type: ClusterIP
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
