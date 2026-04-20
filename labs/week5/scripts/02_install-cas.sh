@@ -22,6 +22,10 @@ kubectl -n kube-system rollout status deploy/cluster-autoscaler-aws-cluster-auto
 kubectl -n kube-system logs deploy/cluster-autoscaler-aws-cluster-autoscaler --tail=20 || true
 
 echo ""
-echo ">>> Discovered ASGs (check '${CLUSTER_NAME}-ng-cas' only — system NG should NOT be discovered):"
-kubectl -n kube-system logs deploy/cluster-autoscaler-aws-cluster-autoscaler \
-  --tail=200 | grep -i "auto-discovery\|found.*asg" || true
+echo ">>> CAS auto-discovery 태그가 붙은 ASG 목록:"
+# EKS managed node group은 AWS가 기본으로 k8s.io/cluster-autoscaler/* 태그를 ASG에 자동 추가합니다.
+# ng-system은 min=max=desired=2로 고정되어 있어 CAS가 발견해도 scale 액션이 발생하지 않습니다.
+# 실제 scale 대상은 min<max 로 설정된 ng-cas 뿐입니다.
+aws autoscaling describe-auto-scaling-groups --region "${AWS_REGION}" \
+  --query "AutoScalingGroups[?Tags[?Key=='k8s.io/cluster-autoscaler/enabled' && Value=='true']].[AutoScalingGroupName, MinSize, MaxSize, DesiredCapacity]" \
+  --output table

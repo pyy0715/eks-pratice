@@ -1,6 +1,6 @@
 ########################
 # Karpenter (IAM + Pod Identity only)
-# Helm chart는 scripts/04_install-karpenter.sh 에서 설치
+# Helm chart는 scripts/03_install-karpenter.sh 에서 설치
 ########################
 
 module "karpenter" {

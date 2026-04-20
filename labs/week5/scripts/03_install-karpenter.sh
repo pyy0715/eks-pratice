@@ -9,7 +9,8 @@ set -euo pipefail
 : "${AWS_REGION:=ap-northeast-2}"
 
 KARPENTER_VERSION="${KARPENTER_VERSION:-1.11.1}"
-KARPENTER_QUEUE_NAME="${KARPENTER_QUEUE_NAME:-${CLUSTER_NAME}}"
+# Queue는 karpenter.tf 의 terraform-aws-modules/eks/aws//modules/karpenter 가 "Karpenter-<cluster>" 로 생성합니다.
+KARPENTER_QUEUE_NAME="${KARPENTER_QUEUE_NAME:-Karpenter-${CLUSTER_NAME}}"
 
 helm upgrade --install karpenter \
   oci://public.ecr.aws/karpenter/karpenter \
@@ -26,7 +27,3 @@ kubectl -n kube-system rollout status deploy/karpenter
 echo ""
 echo ">>> Karpenter CRDs:"
 kubectl get crd | grep karpenter
-
-echo ""
-echo ">>> NodePool / EC2NodeClass는 시나리오 2에서 apply 합니다."
-echo "    manifests/scenario2/10-karpenter-install/ 참고"

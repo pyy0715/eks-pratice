@@ -1,5 +1,3 @@
-# 워크로드 PDB — Karpenter consolidation / CAS drain 시 동시 종료 상한
-# 시나리오2 incident #1 (Consolidation PDB 위반) 에서 이 PDB가 보호막 역할
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:

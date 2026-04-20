@@ -1,5 +1,3 @@
-# NodePool — 안전한 기본 설정 (spot + on-demand 혼합, disruption.budgets 적용)
-# 적용: kubectl apply -f nodepool-default.yaml
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:
@@ -40,5 +38,4 @@ spec:
     consolidationPolicy: WhenEmptyOrUnderutilized
     consolidateAfter: 1m
     budgets:
-      # 동시 교체 노드 수 상한 — PDB 충돌 방지
       - nodes: "10%"

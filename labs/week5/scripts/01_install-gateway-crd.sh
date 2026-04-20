@@ -34,5 +34,5 @@ fi
 kubectl -n kube-system rollout status deploy/aws-load-balancer-controller
 
 echo ""
-echo ">>> Check GatewayClass registration:"
-kubectl get gatewayclass
+echo ">>> Verify gateway reconciler started (v3.x는 GatewayClass 자동 등록 없음 — scenario1/10-gateway-install 에서 apply):"
+kubectl -n kube-system logs deploy/aws-load-balancer-controller --tail=100 | grep -i "gateway route reconciler" || true

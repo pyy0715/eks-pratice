@@ -1,5 +1,5 @@
 ########################
-# Security Group Setup
+# Security Group
 ########################
 
 resource "aws_security_group" "node_group_sg" {
@@ -76,7 +76,9 @@ module "eks" {
         AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
       }
 
-      # CAS auto-discovery 태그 — scripts/03_install-cas.sh 가 이 태그로 ASG 발견
+      # CAS auto-discovery 태그는 EKS가 모든 managed NG에 자동으로 붙입니다.
+      # ng-system은 min=max=desired=2 로 고정되어 있어 CAS 발견 대상이어도 scale 액션이 일어나지 않습니다.
+      # 아래 태그는 명시적 선언으로 의도를 드러내기 위한 것이며 동작상 필수는 아닙니다.
       tags = {
         "k8s.io/cluster-autoscaler/enabled"                = "true"
         "k8s.io/cluster-autoscaler/${var.ClusterBaseName}" = "owned"
@@ -131,7 +133,7 @@ module "eks" {
     }
   }
 
-  # EKS Add-ons (external-dns는 Helm으로 별도 설치 — Gateway API sources 커스터마이징 필요)
+  # EKS Add-ons
   addons = {
     coredns = {
       most_recent = true
@@ -155,6 +157,15 @@ module "eks" {
     }
     eks-pod-identity-agent = {
       most_recent = true
+    }
+    external-dns = {
+      most_recent = true
+      configuration_values = jsonencode({
+        sources       = ["ingress", "gateway-httproute"]
+        domainFilters = [var.MyDomain]
+        txtOwnerId    = var.ClusterBaseName
+        policy        = "sync"
+      })
     }
   }
 

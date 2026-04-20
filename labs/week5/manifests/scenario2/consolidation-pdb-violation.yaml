@@ -1,26 +1,3 @@
-# INCIDENT #1 — Overly Strict PDB Blocking Consolidation
-# PDB minAvailable: 100% 가 모든 disruption을 차단
-# → Karpenter consolidation이 정상 동작하지만 PDB가 pod eviction을 막음
-# → 노드 교체/유지보수 불가 상태
-#
-# 근원: Karpenter 설정 문제가 아니라 PDB 설계 결함
-#   - minAvailable: 100% 는 "어떤 상황에서도 pod를 내리지 마라"와 동일
-#   - 가용성 100% 보장은 불가능 — 노드 장애, AZ 장애, 스폿 중단 시 어차피 pod가 죽음
-#   - PDB는 "계획된 disruption 동안 최소 가용성"을 보장하는 장치이지
-#     "절대로 pod를 내리지 마라"가 아님
-#
-# 증상:
-#   - Karpenter 로그에 반복되는 "cannot disrupt due to PDB"
-#   - 노드가 consolidateAfter를 지났는데도 교체되지 않음
-#   - kubectl get pdb → disruptionsAllowed: 0
-#
-# 진단:
-#   kubectl -n kube-system logs deploy/karpenter --tail=200 | grep -i disrupt
-#   kubectl get pdb -A
-#   kubectl get pdb critical-app-pdb -n default -o jsonpath='{.status.disruptionsAllowed}'
-#
-# 복구: PDB를 minAvailable: 80% 또는 maxUnavailable: 1 로 변경
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -44,8 +21,6 @@ spec:
               cpu: 500m
               memory: 512Mi
 ---
-# PDB — minAvailable: 100% 는 disruptionsAllowed: 0 과 동일
-# "모든 pod가 항상 Running이어야 한다"는 요구는 노드 유지보수를 불가능하게 만듦
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -57,7 +32,6 @@ spec:
     matchLabels:
       app: critical-app
 ---
-# NodePool — budgets 포함 (이게 문제가 아님)
 apiVersion: karpenter.sh/v1
 kind: NodePool
 metadata:

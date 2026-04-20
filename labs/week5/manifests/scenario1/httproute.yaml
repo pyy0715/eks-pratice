@@ -1,5 +1,14 @@
-# 정상 HTTPRoute — Gateway "demo-gw" 의 https listener 에 attach
-# 마이그레이션 20-migration 단계에서 사용하는 기준 HTTPRoute 매니페스트
+apiVersion: gateway.k8s.aws/v1beta1
+kind: TargetGroupConfiguration
+metadata:
+  name: nginx-tg
+  namespace: demo
+spec:
+  targetReference:
+    name: nginx
+  defaultConfiguration:
+    targetType: ip
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -10,7 +19,7 @@ spec:
     - name: demo-gw
       sectionName: https
   hostnames:
-    - gw.${MyDomain}
+    - api-gateway.${MyDomain}
   rules:
     - matches:
         - path:

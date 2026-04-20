@@ -1,7 +1,7 @@
 data "aws_caller_identity" "current" {}
 
 ########################
-# AWS Load Balancer Controller — IRSA
+# AWS Load Balancer Controller — Pod Identity
 # Gateway API(HTTPRoute, Gateway, GatewayClass) 관리에도 동일 Controller가 사용됨 (v2.14.0+)
 ########################
 
@@ -14,32 +14,33 @@ resource "aws_iam_policy" "aws_lb_controller_policy" {
   policy = data.http.aws_lb_controller_policy.response_body
 }
 
-resource "aws_iam_role" "lbc_irsa" {
-  name = "${var.ClusterBaseName}-lbc-irsa-role"
+resource "aws_iam_role" "lbc_pod_identity" {
+  name = "${var.ClusterBaseName}-lbc-pod-identity-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
-      Principal = { Federated = module.eks.oidc_provider_arn }
-      Action    = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "${module.eks.oidc_provider}:aud" = "sts.amazonaws.com"
-          "${module.eks.oidc_provider}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
-        }
-      }
+      Principal = { Service = "pods.eks.amazonaws.com" }
+      Action    = ["sts:AssumeRole", "sts:TagSession"]
     }]
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lbc_irsa" {
-  role       = aws_iam_role.lbc_irsa.name
+resource "aws_iam_role_policy_attachment" "lbc_pod_identity" {
+  role       = aws_iam_role.lbc_pod_identity.name
   policy_arn = aws_iam_policy.aws_lb_controller_policy.arn
+}
+
+resource "aws_eks_pod_identity_association" "aws_lb_controller" {
+  cluster_name    = module.eks.cluster_name
+  namespace       = "kube-system"
+  service_account = "aws-load-balancer-controller"
+  role_arn        = aws_iam_role.lbc_pod_identity.arn
 }
 
 ########################
 # External-DNS — Pod Identity
-# sources={ingress,gateway-httproute} 로 Helm 설치 (scripts/02)
+# EKS addon으로 설치됨 (eks.tf의 cluster_addons)
 ########################
 
 resource "aws_iam_policy" "external_dns_policy" {
@@ -91,7 +92,7 @@ resource "aws_eks_pod_identity_association" "external_dns" {
 
 ########################
 # Cluster Autoscaler — Pod Identity
-# scripts/03 에서 Helm 설치
+# scripts/02 에서 Helm 설치
 ########################
 
 resource "aws_iam_policy" "cas_autoscaling_policy" {
