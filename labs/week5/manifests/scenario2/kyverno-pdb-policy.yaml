@@ -1,0 +1,84 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pdb-anti-patterns
+  annotations:
+    policies.kyverno.io/title: PodDisruptionBudget Anti-Patterns
+    policies.kyverno.io/description: |
+      disruptionsAllowed 를 0 으로 고정시키는 두 가지 PDB 안티패턴을 차단합니다.
+      - maxUnavailable: 0 → 모든 자발적 eviction 차단
+      - minAvailable: 100% → 모든 자발적 eviction 차단
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: maxunavailable-nonzero
+      match:
+        any:
+          - resources:
+              kinds:
+                - PodDisruptionBudget
+      validate:
+        message: "maxUnavailable 은 0 보다 커야 합니다. 0 은 모든 자발적 eviction 을 차단합니다."
+        pattern:
+          spec:
+            "=(maxUnavailable)": ">0"
+    - name: minavailable-not-100-percent
+      match:
+        any:
+          - resources:
+              kinds:
+                - PodDisruptionBudget
+      validate:
+        message: "minAvailable: 100% 는 disruptionsAllowed 를 0 으로 고정시켜 consolidation, drain, upgrade 를 전면 차단합니다."
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.minAvailable || '' }}"
+                operator: Equals
+                value: "100%"
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pdb-minavailable-not-equal-replicas
+  annotations:
+    policies.kyverno.io/title: PodDisruptionBudget minAvailable Not Equal To Replicas
+    policies.kyverno.io/description: |
+      Deployment, StatefulSet 의 replicas 와 매칭되는 PDB 의 minAvailable 이
+      같으면 disruptionsAllowed 가 0 으로 고정되어 consolidation, drain,
+      upgrade 등 자발적 disruption 이 모두 차단됩니다.
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: minavailable-equals-replicas
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: AnyIn
+            value:
+              - CREATE
+              - UPDATE
+          - key: "{{ request.object.spec.replicas || `1` }}"
+            operator: GreaterThan
+            value: 0
+      context:
+        - name: minavailable
+          apiCall:
+            urlPath: /apis/policy/v1/namespaces/{{request.namespace}}/poddisruptionbudgets
+            jmesPath: "items[?label_match(spec.selector.matchLabels, `{{request.object.spec.template.metadata.labels}}`)] | [0] | spec.minAvailable || `0`"
+      validate:
+        message: "매칭되는 PDB 의 minAvailable 이 replicas 와 같습니다. disruptionsAllowed 가 0 으로 고정되어 자발적 disruption 이 전면 차단됩니다."
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.replicas }}"
+                operator: Equals
+                value: "{{ minavailable }}"

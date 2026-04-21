@@ -33,7 +33,7 @@ source 00_env.sh
 
 !!! warning "Initial Apply"
 
-    `helm` provider가 EKS 클러스터 endpoint에 의존하므로 첫 apply에서 20분 이상 소요될 수 있습니다. provider 초기화 오류가 발생하면 `terraform apply -target=module.eks`로 클러스터를 먼저 만든 뒤 `terraform apply`를 다시 실행합니다.
+    `helm` provider가 EKS 클러스터 endpoint에 의존하므로 첫 apply에서 시간이 소요될 수 있습니다. provider 초기화 오류가 발생하면 `terraform apply -target=module.eks`로 클러스터를 먼저 만든 뒤 `terraform apply`를 다시 실행합니다.
 
 ### Configure kubectl
 
@@ -41,7 +41,7 @@ source 00_env.sh
 
 ```bash
 kubectl config delete-context myeks
-eval $(terraform -chdir=labs/week5 output -raw configure_kubectl)
+eval $(terraform output -raw configure_kubectl)
 kubectl config rename-context $(kubectl config current-context) myeks
 kubectl get nodes -L eks.amazonaws.com/nodegroup
 ```
@@ -69,18 +69,16 @@ kubectl -n kube-system get deploy \
 
 ---
 
-## Scenario 1 — Ingress(ALB) → Gateway API Migration
+## Scenario 1
 
-???+ info "Migration motivation"
+???+ info
 
-    서비스 라우팅을 기존 Ingress(annotations 기반)에서 **Gateway API**(표준 리소스 기반)로 전환하는 작업을 진행했습니다. 목적은 두 가지였습니다.
+    서비스 라우팅을 Ingress annotation 방식에서 **Gateway API** 로 전환하는 작업을 진행했습니다. 목적은 두 가지였습니다.
 
-    - ALB 설정을 annotation 키-값 나열에서 **CRD 필드**로 옮겨 검토 가능한 상태로 만들기
-    - Canary, weighted routing을 별도 툴 없이 HTTPRoute 단위로 제어하기
+    - ALB 동작을 결정하는 설정을 annotation 키-값 나열에서 **HTTPRoute, Gateway 같은 CRD 필드** 로 옮겨 리뷰 가능한 형태로 관리하기
+    - Canary, weighted routing 을 annotation 조합 없이 HTTPRoute 의 표준 필드로 직접 제어하기
 
-    AWS Load Balancer Controller v2.14.0부터 Gateway API가 GA로 지원되면서 동일 Controller가 Ingress와 HTTPRoute를 동시에 관리할 수 있게 되어, 중단 없이 점진 전환이 가능하다고 판단했습니다.
-
-### Rolling Update 5xx After Gateway Cutover
+    AWS Load Balancer Controller v3.0.0 부터 Gateway API 가 GA 로 지원되면서 동일한 Controller 가 Ingress 와 HTTPRoute 를 동시에 관리할 수 있게 됐고, 기존 Ingress 를 유지한 채 HTTPRoute 를 점진 추가하는 방식으로 무중단 전환이 가능하다고 판단했습니다.
 
 **Incident**
 
@@ -159,35 +157,41 @@ Gateway ALB 를 새로 띄운 직후에는 `kubectl rollout restart` 로 Pod 을
     kubectl apply -f manifests/scenario1/deployment.yaml
     ```
 
-[^lbc-readiness-gate]: [AWS Load Balancer Controller — Pod Readiness Gate](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/). 구현은 `pkg/inject/pod_readiness/pod_readiness_gate.go` 의 mutating webhook 이며 Pod 생성 시점의 TargetGroupBinding 목록을 기준으로 gate 를 추가합니다. 본 랩(LBC v3.2.1)에서 Ingress → Gateway 공존 전환을 재현한 결과, Gateway TargetGroupBinding 이 생성되기 전에 만들어진 Pod 에는 Gateway gate 가 빠져 있고 이후 rollout restart 로 Pod 을 재생성해야 두 gate 가 모두 확보됐습니다.
+[^lbc-readiness-gate]: [AWS Load Balancer Controller — Pod Readiness Gate](https://kubernetes-sigs.github.io/aws-load-balancer-controller/latest/deploy/pod_readiness_gate/)
 
 ---
 
-## Scenario 2 — Cluster Autoscaler → Karpenter Migration
+## Scenario 2
 
-???+ info "Migration motivation"
+???+ info
 
     Managed Node Group 과 Cluster Autoscaler 구성에서 Karpenter 로 전환했습니다. 목적은 두 가지였습니다.
 
     - **Bin-packing 효율** — CAS 는 ASG 단위 scale 만 가능해 instance family 가 고정됩니다. Karpenter 는 Pod 요구를 보고 인스턴스 타입을 직접 선택합니다.
-    - **Consolidation** — Karpenter 가 저부하 노드를 자동으로 합쳐 비용을 낮춥니다.
+    - **Consolidation** — Karpenter 가 저사용 노드를 더 작은 인스턴스로 교체하거나 빈 노드를 제거해 비용을 낮춥니다.
 
-    전환은 **dual-run** 방식으로 진행했습니다. 기존 ASG 는 유지한 채 Karpenter NodePool 을 배포하고, 안정성을 확인한 뒤 ASG 를 `min=0` 까지 낮췄습니다.
-
-### Consolidation Blocked by Overly Strict PDB
+    전환은 **CAS 와 Karpenter 를 병행 운영하는 방식**으로 진행했습니다. 기존 ASG 는 유지한 채 Karpenter NodePool 을 배포하고, 안정성을 확인한 뒤 ASG 를 `min=0` 까지 낮췄습니다.
 
 **Incident**
 
-Karpenter 도입 후 consolidation 이 전혀 동작하지 않았습니다. 비용 최적화를 기대했지만 오래된 노드가 그대로 남았고, Karpenter 설정 자체는 정상이었습니다.
+Karpenter 도입 후 consolidation 이 전혀 동작하지 않았습니다. 비용 최적화를 기대했지만 저사용 노드가 줄어들지 않았고, Karpenter 설정 자체에는 문제가 없었습니다.
 
 **Detection**
 
-Karpenter controller 로그에 disruption 차단 메시지가 반복됐습니다.
+Karpenter 는 disruption 이 차단된 이유를 `DisruptionBlocked` reason 으로 Node 와 NodeClaim 양쪽에 Event 로 emit 합니다.
 
 ```bash
-kubectl -n kube-system logs deploy/karpenter --tail=200 | grep -i disrupt
-# level=INFO msg="disrupting via consolidation replace"
-# level=WARN msg="cannot disrupt due to PDB"
+kubectl get events -A --field-selector reason=DisruptionBlocked \
+  -o jsonpath='{range .items[*]}{.involvedObject.kind}/{.involvedObject.name}{"\t"}{.message}{"\n"}{end}' \
+  | grep -i pdb
+# Node/ip-192-168-2-139...       Pdb prevents pod evictions (PodDisruptionBudget=[default/critical-app-pdb])
+# NodeClaim/default-slh45        Pdb prevents pod evictions (PodDisruptionBudget=[default/critical-app-pdb])
+```
+
+특정 노드를 지정해 `describe` 하면 같은 Event 를 시간순으로 확인할 수 있습니다.
+
+```bash
+kubectl describe node <node-name> | grep -A3 DisruptionBlocked
 ```
 
 PDB 상태를 보면 `disruptionsAllowed: 0` 으로, 단일 Pod 도 eviction 되지 못하는 상태입니다.
@@ -199,47 +203,116 @@ kubectl get pdb critical-app-pdb -n default -o jsonpath='{.status.disruptionsAll
 
 **Root Cause**
 
-원인은 Karpenter 가 아니라 PDB 설정이었습니다. 서비스 팀이 `minAvailable: 100%` 로 지정해 `disruptionsAllowed` 가 항상 0 으로 고정됐고, consolidation 은 물론 `kubectl drain` 과 노드 업그레이드까지 모두 막혔습니다.
+원인은 Karpenter 가 아니라 PDB 설정이었습니다. 서비스 팀이 `minAvailable: 100%` 로 지정해 `disruptionsAllowed` 가 항상 0 으로 고정됐고, consolidation 은 물론 `kubectl drain` 이 차단됐고, Managed Node Group 업그레이드도 `--force` 없이는 `PodEvictionFailure` 로 실패했습니다.
 
 `minAvailable: 100%` 는 disruption 종류별로 다르게 작동합니다.
 
-| Disruption 종류 | 예시 | `minAvailable: 100%` 효과 |
-|-----------------|------|---------------------------|
+| Disruption Type | Examples | Effect of `minAvailable: 100%` |
+|-----------------|----------|-------------------------------|
 | 계획 disruption | consolidation, drain, upgrade | **차단** (유지보수 불가) |
 | 비계획 disruption | 노드 장애, AZ 장애, spot 중단 | 보호 없음 (Pod 강제 종료) |
 
-유지보수만 차단하고 실제 장애는 막지 못하는 설정입니다. Salesforce 도 [1,000 개 클러스터 마이그레이션](https://aws.amazon.com/blogs/architecture/how-salesforce-migrated-from-cluster-autoscaler-to-karpenter-across-their-fleet-of-1000-eks-clusters/) 에서 동일 문제를 겪고 OPA 로 PDB 를 사전 검증하는 체계를 구축했습니다.
+유지보수만 차단하고 실제 장애는 막지 못하는 설정입니다.
 
 **Resolution**
 
-PDB 를 `minAvailable: 80%` 로 완화해 동시에 최대 20% 까지 eviction 이 가능하도록 합니다.
+PDB 를 `minAvailable: 80%` 로 완화해 동시에 최대 20% (Pod 2개) 까지 eviction 이 가능하도록 합니다.
 
 ```bash
 kubectl patch pdb critical-app-pdb -n default -p '{"spec":{"minAvailable":"80%"}}'
 ```
 
+**Prevention**
+
+사후 완화만으로는 동일 사고가 재발합니다. Salesforce 도 [1,000 개 클러스터 마이그레이션](https://aws.amazon.com/blogs/architecture/how-salesforce-migrated-from-cluster-autoscaler-to-karpenter-across-their-fleet-of-1000-eks-clusters/) 에서 동일 문제를 겪고 Open Policy Agent(OPA) 로 PDB 를 사전 검증하는 체계를 구축했습니다. 여기서는 동일한 접근을 [Kyverno](https://kyverno.io/policies/) 로 구현합니다. 안티패턴 PDB 를 생성 시점에 차단하는 admission policy 로 `minAvailable: 100%` 와 `maxUnavailable: 0` 을 모두 거부합니다.
+
+```yaml title="manifests/scenario2/kyverno-pdb-policy.yaml"
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: pdb-anti-patterns
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: maxunavailable-nonzero
+      match:
+        any:
+          - resources:
+              kinds: [PodDisruptionBudget]
+      validate:
+        message: "maxUnavailable 은 0 보다 커야 합니다. 0 은 모든 자발적 eviction 을 차단합니다."
+        pattern:
+          spec:
+            "=(maxUnavailable)": ">0"
+    - name: minavailable-not-100-percent
+      match:
+        any:
+          - resources:
+              kinds: [PodDisruptionBudget]
+      validate:
+        message: "minAvailable: 100% 는 disruptionsAllowed 를 0 으로 고정시켜 consolidation, drain, upgrade 를 전면 차단합니다."
+        deny:
+          conditions:
+            any:
+              - key: "{{ request.object.spec.minAvailable || '' }}"
+                operator: Equals
+                value: "100%"
+```
+
+설치와 적용은 다음과 같습니다.
+
+```bash
+helm repo add kyverno https://kyverno.github.io/kyverno/
+helm install kyverno kyverno/kyverno -n kyverno --create-namespace --wait
+kubectl apply -f manifests/scenario2/kyverno-pdb-policy.yaml
+```
+
+이후 `consolidation-pdb-violation.yaml` 을 재적용하면 PDB 생성이 admission webhook 단계에서 거부됩니다.
+
+다만 이 두 규칙은 PDB 매니페스트 하나만 놓고 검사하기 때문에 PDB 와 Deployment 를 엮어봐야 드러나는 문제는 잡지 못합니다. 예를 들어 `replicas: 3` Deployment 에 `minAvailable: 3` PDB 를 붙이면 숫자만 보면 평범하지만, 실제로는 항상 3 개 전부 살아있어야 한다는 뜻이라 `minAvailable: 100%` 와 결과가 같습니다. 앞의 `minavailable-not-100-percent` 규칙은 "100%" 문자열만 검사하므로 이 케이스는 통과합니다.
+
+이런 절대값 안티패턴까지 막으려면 검증 방향을 뒤집어야 합니다. **PDB 가 아니라 Deployment, StatefulSet 이 생성, 변경될 때 해당 워크로드의 `replicas` 와 매칭되는 PDB 의 `minAvailable` 을 같이 읽어서 `replicas == minAvailable` 이면 거부하는 방식입니다.** Kyverno 공식 policy 라이브러리의 `pdb-minavailable-check`[^kyverno-minavailable] 규칙이 이 역할을 합니다. 앞의 두 규칙과 함께 배포하면 세 가지 안티패턴(`maxUnavailable: 0`, `minAvailable: 100%`, `replicas == minAvailable`) 이 모두 차단됩니다.
+
 !!! tip "Lesson"
 
     - `minAvailable: 100%` 는 가용성을 보장하지 않으면서 유지보수만 차단합니다. PDB 값은 어느 수준까지 견딜 수 있는가에 대한 답으로 설정합니다.
     - 이런 설정을 사전 차단하려면 OPA 나 Kyverno 로 admission policy 를 추가해 `minAvailable: 100%` 또는 `maxUnavailable: 0` PDB 생성을 막습니다.
-    - PDB 는 Pod 단위 보호막이고 NodePool 의 `disruption.budgets` 은 노드 단위 속도 제한입니다. 두 장치가 함께 작동해야 consolidation 이 안전하게 진행됩니다.
+    - PDB 퍼센트는 올림으로 계산되므로 `replicas` 가 작을수록 의도한 여유가 사라집니다. 예를 들어 `replicas: 3` + `minAvailable: 80%` 는 `ceil(2.4) = 3` 이라 3 available 을 요구해 `disruptionsAllowed = 0` 이 됩니다. 소규모 Deployment 는 절대수(`maxUnavailable: 1`) 를 함께 검토하는 편이 안전합니다.
+    - PDB 는 Pod 단위 eviction 제약이고 NodePool 의 `disruption.budgets` 은 노드 단위 속도 제한입니다. 두 장치가 함께 작동해야 consolidation 이 안전하게 진행됩니다.
 
 !!! example "Reproduction"
 
     `labs/week5` 디렉터리에서 실행합니다.
 
     ```bash
-    # 1) critical-app deployment + PDB(minAvailable: 100%) + NodePool 배포
+    # 0) 선행 리소스 — EC2NodeClass, NodePool 배포
+    source 00_env.sh
+    envsubst < manifests/scenario2/ec2nodeclass.yaml | kubectl apply -f -
+    kubectl apply -f manifests/scenario2/nodepool.yaml
+
+    # 1) critical-app deployment + PDB(minAvailable: 100%) 배포
     kubectl apply -f manifests/scenario2/consolidation-pdb-violation.yaml
 
     # 2) PDB 상태 확인 — disruptionsAllowed: 0
     kubectl get pdb critical-app-pdb -n default -o wide
     kubectl get pdb critical-app-pdb -n default -o jsonpath='{.status.disruptionsAllowed}'
 
-    # 3) Karpenter 로그에서 consolidation 차단 관찰
-    kubectl -n kube-system logs deploy/karpenter --tail=200 | grep -i disrupt
+    # 3) Node, NodeClaim Event 에서 consolidation 차단 관찰
+    kubectl get events -A --field-selector reason=DisruptionBlocked \
+      -o jsonpath='{range .items[*]}{.involvedObject.kind}/{.involvedObject.name}{"\t"}{.message}{"\n"}{end}' \
+      | grep -i pdb
 
     # 4) 복구 — PDB를 허용 가능한 수준으로 변경
     kubectl patch pdb critical-app-pdb -n default -p '{"spec":{"minAvailable":"80%"}}'
+
+    # 5) (선택) Kyverno 로 사전 차단 — 재적용 시 admission 거부 확인
+    helm repo add kyverno https://kyverno.github.io/kyverno/
+    helm install kyverno kyverno/kyverno -n kyverno --create-namespace --wait
+    kubectl apply -f manifests/scenario2/kyverno-pdb-policy.yaml
+    kubectl delete -f manifests/scenario2/consolidation-pdb-violation.yaml
+    kubectl apply -f manifests/scenario2/consolidation-pdb-violation.yaml
+    # admission webhook "validate.kyverno.svc-fail" denied the request
     ```
 
+[^kyverno-minavailable]: [Kyverno — Check PodDisruptionBudget minAvailable](https://kyverno.io/policies/other/pdb-minavailable/pdb-minavailable/)

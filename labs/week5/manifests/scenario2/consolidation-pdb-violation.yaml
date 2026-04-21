@@ -4,7 +4,7 @@ metadata:
   name: critical-app
   namespace: default
 spec:
-  replicas: 3
+  replicas: 10
   selector:
     matchLabels:
       app: critical-app
@@ -13,6 +13,8 @@ spec:
       labels:
         app: critical-app
     spec:
+      nodeSelector:
+        provisioner: karpenter
       containers:
         - name: pause
           image: public.ecr.aws/eks-distro/kubernetes/pause:3.7
@@ -31,39 +33,3 @@ spec:
   selector:
     matchLabels:
       app: critical-app
----
-apiVersion: karpenter.sh/v1
-kind: NodePool
-metadata:
-  name: default
-spec:
-  template:
-    metadata:
-      labels:
-        provisioner: karpenter
-    spec:
-      requirements:
-        - key: kubernetes.io/arch
-          operator: In
-          values: ["amd64"]
-        - key: kubernetes.io/os
-          operator: In
-          values: ["linux"]
-        - key: karpenter.sh/capacity-type
-          operator: In
-          values: ["spot", "on-demand"]
-        - key: karpenter.k8s.aws/instance-category
-          operator: In
-          values: ["c", "m", "r"]
-      nodeClassRef:
-        group: karpenter.k8s.aws
-        kind: EC2NodeClass
-        name: default
-      expireAfter: 1h
-  limits:
-    cpu: 100
-  disruption:
-    consolidationPolicy: WhenEmptyOrUnderutilized
-    consolidateAfter: 30s
-    budgets:
-      - nodes: "10%"
