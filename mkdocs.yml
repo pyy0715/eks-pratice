@@ -166,3 +166,9 @@ nav:
       - Availability and Scale: week5/3_availability-and-scale.md
       - Observability and AIOps: week5/4_observability-and-aiops.md
       - Lab: week5/5_lab.md
+  - Week 6:
+      - week6/index.md
+      - GitOps Principles: week6/1_gitops-principles.md
+      - ArgoCD: week6/2_argocd.md
+      - ArgoCD Extensions: week6/3_argocd-extensions.md
+      - Argo Workflows and Events: week6/4_argo-workflows.md
