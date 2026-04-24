@@ -18,6 +18,7 @@
 *[PDB]: Pod Disruption Budget — 자발적 중단 시 최소 가용 Pod 수를 보장하는 정책
 *[SAR]: SubjectAccessReview — 특정 주체가 특정 action을 수행할 수 있는지 K8s API 서버에 질의하는 리소스
 *[TR]: TokenReview — 특정 토큰이 유효한지 K8s API 서버에 질의하는 리소스
+*[CR]: Custom Resource — CustomResourceDefinition(CRD)으로 정의된 사용자 정의 리소스. Application, ApplicationSet처럼 K8s API로 다룰 수 있는 객체
 
 <!-- Autoscaling -->
 *[CAS]: Cluster Autoscaler — Pending Pod 발생 시 ASG를 통해 노드를 자동 추가/제거하는 K8s 컴포넌트
