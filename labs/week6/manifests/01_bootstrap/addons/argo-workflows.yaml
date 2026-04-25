@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-workflows
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            enable_argo_workflows: "true"
+  template:
+    metadata:
+      name: argo-workflows-{{name}}
+      annotations:
+        argocd.argoproj.io/sync-wave: "-10"
+    spec:
+      project: addons
+      source:
+        repoURL: https://argoproj.github.io/argo-helm
+        chart: argo-workflows
+        targetRevision: 0.41.14
+        helm:
+          releaseName: argo-workflows
+          values: |
+            controller:
+              workflowNamespaces:
+                - argo-events
+      destination:
+        server: '{{server}}'
+        namespace: argo-workflows
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

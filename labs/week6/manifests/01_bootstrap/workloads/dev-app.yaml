@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-app-bootstrap
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: workloads
+  source:
+    repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+    targetRevision: main
+    path: manifests/04_image-updater
+    directory:
+      include: '{dev-app.yaml,ecr-auth.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

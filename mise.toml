@@ -11,6 +11,7 @@ TF_VAR_MyDomain = "confclaw.com" # set this to your domain
 TF_VAR_KeyName = "{{ exec(command='aws ec2 describe-key-pairs --query \"KeyPairs[].KeyName\" --output text') }}"
 TF_VAR_ssh_access_cidr = "{{ exec(command='curl -s ipinfo.io/ip') }}/32"
 TF_VAR_MyDnzHostedZoneId = "{{ exec(command='aws route53 list-hosted-zones-by-name --dns-name \"$TF_VAR_MyDomain\" --query \"HostedZones[0].Id\" --output text | sed \"s|/hostedzone/||\"') }}"
+TF_VAR_GitOpsRepoURL = "{{ exec(command='gh api user -q .login 2>/dev/null') }}/gitops-lab.git" # week6 lab
 
 [tasks.serve]
 run = "uv run mkdocs serve"

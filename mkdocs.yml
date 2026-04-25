@@ -170,5 +170,6 @@ nav:
       - week6/index.md
       - GitOps Principles: week6/1_gitops-principles.md
       - ArgoCD: week6/2_argocd.md
-      - ArgoCD Extensions: week6/3_argocd-extensions.md
-      - Argo Workflows and Events: week6/4_argo-workflows.md
+      - Argo Ecosystem: week6/3_argo-ecosystem.md
+      - AWS Integration Patterns: week6/4_aws-integration.md
+      - Lab: week6/5_lab.md

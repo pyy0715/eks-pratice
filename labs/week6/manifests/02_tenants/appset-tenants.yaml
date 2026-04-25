@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: tenants
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+        revision: main
+        files:
+          - path: manifests/02_tenants/values/*.yaml
+  template:
+    metadata:
+      name: 'tenant-{{ .tenant }}'
+      labels:
+        tier: '{{ .tier }}'
+      annotations:
+        # basic=wave 1, advanced=wave 2, premium=wave 3 → staggered rollout
+        argocd.argoproj.io/sync-wave: '{{ .wave }}'
+    spec:
+      project: tenants
+      sources:
+        - repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+          targetRevision: main
+          path: manifests/02_tenants/helm-tenant-chart
+          helm:
+            valueFiles:
+              - '$values/manifests/02_tenants/values/{{ .tenant }}.yaml'
+        - repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+          targetRevision: main
+          ref: values
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: 'tenant-{{ .tenant }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

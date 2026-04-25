@@ -25,10 +25,16 @@ spec:
       destination:
         server: '{{server}}'
         namespace: argo-rollouts
+      ignoreDifferences:
+        # Helm chart 가 명시한 preserveUnknownFields: false 를 K8s API server 가
+        # 기본값이라 응답에서 생략 → desired/live drift 가 영구 발생하는 이슈 회피.
+        - group: apiextensions.k8s.io
+          kind: CustomResourceDefinition
+          jsonPointers:
+            - /spec/preserveUnknownFields
       syncPolicy:
         automated:
           prune: true
           selfHeal: true
         syncOptions:
           - CreateNamespace=true
-          - Replace=true

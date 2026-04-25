@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-app
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: >-
+      app=ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/week6-argocd/sample-app
+    argocd-image-updater.argoproj.io/app.update-strategy: latest
+    argocd-image-updater.argoproj.io/write-back-method: git
+    argocd-image-updater.argoproj.io/git-branch: main
+spec:
+  project: workloads
+  source:
+    repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+    targetRevision: main
+    path: manifests/04_image-updater/dev-app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: healthz-web
+  namespace: rollouts-demo
+spec:
+  args:
+    - name: canary-service
+  metrics:
+    - name: canary-healthz
+      interval: 10s
+      count: 5
+      successCondition: result == "ok"
+      failureLimit: 2
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: probe
+                    image: curlimages/curl:8.10.1
+                    # curl -f returns non-zero on any 4xx/5xx; Job exit code drives success/failure.
+                    command: [sh, -c]
+                    args:
+                      - >
+                        curl --max-time 5 -fsS
+                        "http://{{args.canary-service}}.rollouts-demo.svc/"
+                        >/dev/null && echo ok

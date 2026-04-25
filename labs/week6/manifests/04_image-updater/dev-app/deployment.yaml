@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dev-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dev-app
+  template:
+    metadata:
+      labels:
+        app: dev-app
+    spec:
+      containers:
+        - name: app
+          # Image tag is rewritten by argocd-image-updater on every push to ECR.
+          image: ACCOUNT_ID.dkr.ecr.REGION.amazonaws.com/week6-argocd/sample-app:v1
+          ports:
+            - containerPort: 8080

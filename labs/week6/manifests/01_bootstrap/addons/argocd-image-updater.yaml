@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argocd-image-updater
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            enable_argocd_image_updater: "true"
+  template:
+    metadata:
+      name: argocd-image-updater-{{name}}
+      annotations:
+        argocd.argoproj.io/sync-wave: "-5"
+    spec:
+      project: addons
+      source:
+        repoURL: https://argoproj.github.io/argo-helm
+        chart: argocd-image-updater
+        targetRevision: 0.11.2
+        helm:
+          releaseName: argocd-image-updater
+          values: |
+            config:
+              registries:
+                - name: ECR
+                  api_url: https://{{metadata.annotations.aws_account_id}}.dkr.ecr.{{metadata.annotations.aws_region}}.amazonaws.com
+                  prefix: {{metadata.annotations.aws_account_id}}.dkr.ecr.{{metadata.annotations.aws_region}}.amazonaws.com
+                  ping: true
+                  insecure: false
+                  credentials: pullsecret:argocd/ecr-creds
+                  credsexpire: 8h
+              argocd:
+                grpcWeb: true
+                serverAddress: argocd-server.argocd.svc.cluster.local
+                insecure: true
+                plaintext: true
+      destination:
+        server: '{{server}}'
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:

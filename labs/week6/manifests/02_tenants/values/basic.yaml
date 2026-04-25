@@ -1,0 +1,14 @@
+tenant: basic
+tier: basic
+wave: "1"
+replicaCount: 1
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 200m
+    memory: 128Mi

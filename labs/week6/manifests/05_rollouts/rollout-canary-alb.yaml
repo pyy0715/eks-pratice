@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: canary-demo
+  namespace: rollouts-demo
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      canaryService: canary-demo-canary
+      stableService: canary-demo-stable
+      trafficRouting:
+        alb:
+          ingress: canary-demo
+          servicePort: 80
+          rootService: canary-demo-root
+      steps:
+        - setWeight: 20
+        - pause: {duration: 30s}
+        - analysis:
+            templates:
+              - templateName: healthz-web
+            args:
+              - name: canary-service
+                value: canary-demo-canary
+        - setWeight: 50
+        - pause: {duration: 30s}
+        - setWeight: 100
+  selector:
+    matchLabels:
+      app: canary-demo
+  template:
+    metadata:
+      labels:
+        app: canary-demo
+    spec:
+      containers:
+        - name: app
+          image: argoproj/rollouts-demo:blue
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080

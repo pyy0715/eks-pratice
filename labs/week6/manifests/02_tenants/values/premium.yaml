@@ -1,0 +1,14 @@
+tenant: premium
+tier: premium
+wave: "3"
+replicaCount: 3
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi

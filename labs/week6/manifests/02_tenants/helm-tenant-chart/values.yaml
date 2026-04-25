@@ -1,0 +1,7 @@
+tenant: default
+tier: basic
+replicaCount: 1
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+resources: {}

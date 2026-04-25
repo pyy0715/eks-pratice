@@ -14,4 +14,3 @@ spec:
       queue: week6-argocd-tenant-onboarding
       waitTimeSeconds: 20
       jsonBody: true
-      sessionToken: ""

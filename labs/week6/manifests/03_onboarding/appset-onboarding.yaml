@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: onboarding
+  namespace: argocd
+spec:
+  generators:
+    - clusters:
+        selector:
+          matchLabels:
+            enable_argo_events: "true"
+  template:
+    metadata:
+      name: onboarding-{{name}}
+      annotations:
+        argocd.argoproj.io/sync-wave: "-5"
+    spec:
+      project: workloads
+      source:
+        repoURL: https://github.com/CHANGE-ME/gitops-lab.git
+        targetRevision: main
+        path: manifests/03_onboarding
+        directory:
+          recurse: true
+          exclude: 'appset-onboarding.yaml'
+      destination:
+        server: '{{server}}'
+        namespace: argo-events
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

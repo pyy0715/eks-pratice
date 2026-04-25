@@ -1,0 +1,14 @@
+tenant: advanced
+tier: advanced
+wave: "2"
+replicaCount: 2
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: "1.27"
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
