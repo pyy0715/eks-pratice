@@ -1,0 +1,61 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: tenant-onboarding
+  namespace: argo-events
+spec:
+  serviceAccountName: argo-events-sa
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: tenant
+      - name: tier
+  templates:
+    - name: main
+      inputs:
+        parameters:
+          - name: tenant
+          - name: tier
+      container:
+        image: alpine/git:2.43.0
+        command: [sh, -c]
+        args:
+          - |
+            set -euo pipefail
+            TENANT="{{inputs.parameters.tenant}}"
+            TIER="{{inputs.parameters.tier}}"
+            case "$TIER" in
+              basic)    WAVE=1 ;;
+              advanced) WAVE=2 ;;
+              premium)  WAVE=3 ;;
+              *) echo "unknown tier: $TIER"; exit 1 ;;
+            esac
+
+            git clone --depth=1 "https://${GITHUB_TOKEN}@${REPO_HOST}/${REPO_PATH}" /repo
+            cd /repo
+            mkdir -p manifests/02_tenants/values
+            cat > "manifests/02_tenants/values/${TENANT}.yaml" <<EOF
+            tenant: ${TENANT}
+            tier: ${TIER}
+            wave: "${WAVE}"
+            replicaCount: 1
+            image:
+              repository: public.ecr.aws/nginx/nginx
+              tag: "1.27"
+            EOF
+
+            git config user.email "argo-events@week6.lab"
+            git config user.name "argo-events"
+            git add "manifests/02_tenants/values/${TENANT}.yaml"
+            git commit -m "onboard tenant ${TENANT} (${TIER})"
+            git push origin HEAD:main
+        env:
+          - name: GITHUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: github-push-token
+                key: token
+          - name: REPO_HOST
+            value: github.com
+          - name: REPO_PATH
+            value: CHANGE-ME/gitops-lab.git
