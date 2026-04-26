@@ -21,6 +21,7 @@ resource "aws_sqs_queue" "tenant_onboarding" {
 resource "aws_ecr_repository" "sample_app" {
   name                 = "${var.ClusterBaseName}/sample-app"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true
 
   image_scanning_configuration {
     scan_on_push = true
