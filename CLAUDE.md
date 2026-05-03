@@ -12,7 +12,6 @@
 - Read ALL related docs in the same directory before making changes, not just one file
 - When changing a doc title or structure, also update mkdocs.yml and index.md
 - Present all proposed changes as a numbered list for review before applying edits
-- Build with `mise run build` to verify after doc edits
 
 ## Verification Requirements
 - Verify AWS/EKS claims against official docs (AWS Knowledge MCP or WebFetch) before writing

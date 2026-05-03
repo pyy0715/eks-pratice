@@ -173,3 +173,10 @@ nav:
       - Argo Ecosystem: week6/3_argo-ecosystem.md
       - AWS Integration Patterns: week6/4_aws-integration.md
       - Lab: week6/5_lab.md
+  - Week 7:
+      - week7/index.md
+      - Version Lifecycle: week7/1_version-lifecycle.md
+      - Upgrade Preparation: week7/2_upgrade-preparation.md
+      - Upgrade Strategies: week7/3_upgrade-strategies.md
+      - In-Place Upgrade: week7/4_in-place-upgrade.md
+      - Blue/Green Upgrade: week7/5_blue-green-upgrade.md
