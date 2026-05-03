@@ -12,7 +12,7 @@
 | 4 | [EKS AuthN/AuthZ](week4/index.md) |
 | 5 | [EKS Troubleshooting & Debugging](week5/index.md)|
 | 6 | [GitOps on EKS with ArgoCD](week6/index.md) |
-| 7 | EKS Upgrade |
+| 7 | [EKS Upgrade](week7/index.md) |
 | 8 | EKS Automation & Operations (Auto Mode, AgentOps) |
 | 9 | ML & AI on EKS |
 
