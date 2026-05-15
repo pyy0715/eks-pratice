@@ -10,53 +10,17 @@ langfuse:
   nextauth:
     secret:
       value: secret
-  additionalEnv:
-    - name: LANGFUSE_INIT_ORG_ID
-      value: my-org
-    - name: LANGFUSE_INIT_PROJECT_ID
-      value: my-project
-    - name: LANGFUSE_INIT_PROJECT_PUBLIC_KEY
-      value: "${LANGFUSE_PUBLIC_KEY}"
-    - name: LANGFUSE_INIT_PROJECT_SECRET_KEY
-      value: "${LANGFUSE_SECRET_KEY}"
-    - name: LANGFUSE_INIT_USER_EMAIL
-      value: "admin@example.com"
-    - name: LANGFUSE_INIT_USER_PASSWORD
-      value: "Pass@123"
 
 postgresql:
-  enabled: true
+  deploy: true
   auth:
     username: admin
     password: password123
-  primary:
-    resources:
-      requests:
-        cpu: 125m
-        memory: 256Mi
 
 clickhouse:
-  enabled: true
-  auth:
-    password: password123
-  replicaCount: 1
-  resources:
-    requests:
-      cpu: "1"
-      memory: "3Gi"
-  zookeeper:
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: 250m
-        memory: 384Mi
+  deploy: true
 
-valkey:
-  enabled: true
+redis:
+  deploy: true
   auth:
     password: password123
-  master:
-    resources:
-      requests:
-        cpu: 125m
-        memory: 256Mi

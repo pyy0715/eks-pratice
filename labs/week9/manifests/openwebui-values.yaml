@@ -8,10 +8,6 @@ pipelines:
 
 openaiBaseApiUrl: "http://litellm.litellm:4000/v1"
 
-extraEnvVars:
-  - name: OPENAI_API_KEY
-    value: "${LITELLM_API_KEY}"
-
 resources:
   requests:
     cpu: "1"

@@ -1,5 +1,7 @@
 replicaCount: 1
 
+masterkey: ""
+
 resources:
   requests:
     cpu: "1"
@@ -11,9 +13,9 @@ service:
   type: ClusterIP
   port: 4000
 
+envVars: {}
+
 proxy_config:
-  store_model_in_db: true
-  drop_params: true
   model_list:
     - model_name: vllm/qwen3-8b-neuron
       litellm_params:
@@ -24,9 +26,12 @@ proxy_config:
       litellm_params:
         model: bedrock/global.anthropic.claude-sonnet-4-5-20250929-v1:0
         aws_region_name: us-east-2
+  general_settings:
+    master_key: os.environ/PROXY_MASTER_KEY
   litellm_settings:
     success_callback:
       - langfuse
+    drop_params: true
     cache: true
     cache_params:
       type: redis
@@ -34,23 +39,13 @@ proxy_config:
       port: 6379
 
 postgresql:
-  enabled: true
+  architecture: standalone
   auth:
-    username: admin
+    username: litellm
+    database: litellm
     password: password123
-  primary:
-    resources:
-      requests:
-        cpu: 125m
-        memory: 256Mi
+    postgres-password: password123
 
 redis:
   enabled: true
   architecture: standalone
-  auth:
-    enabled: false
-  master:
-    resources:
-      requests:
-        cpu: 125m
-        memory: 256Mi

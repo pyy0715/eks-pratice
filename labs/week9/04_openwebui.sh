@@ -10,7 +10,8 @@ helm repo update open-webui
 helm upgrade --install openwebui open-webui/open-webui \
   --namespace openwebui --create-namespace \
   --values "$(dirname "$0")/manifests/openwebui-values.yaml" \
-  --set "openWebUi.env.OPENAI_API_KEY=$LITELLM_API_KEY" \
+  --set "extraEnvVars[0].name=OPENAI_API_KEY" \
+  --set "extraEnvVars[0].value=$LITELLM_API_KEY" \
   --wait --timeout 10m
 
 echo "=== Open WebUI deployed ==="
