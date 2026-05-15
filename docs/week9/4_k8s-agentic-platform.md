@@ -14,20 +14,7 @@ flowchart LR
     AGENT --> MCP1["MCP Server"]
 ```
 
----
-
-## Repository Structure
-
-| Directory | Description |
-|---|---|
-| `terraform/` | VPC, EKS Auto Mode, EFS, NodePool IaC |
-| `components/` | 배포 가능한 서비스 모듈 (ai-gateway, llm-model, o11y, vector-database, ai-agent) |
-| `examples/` | Strands Agents, Agno 등 Agent 예제 |
-| `cli` | Node.js 기반 대화형 배포 CLI |
-| `config.json` | 컴포넌트 및 모델 기본 설정 |
-| `.env` / `.env.local` | 리전, 클러스터명, HF_TOKEN 등 환경 변수 |
-
-Starter Kit은 CLI 기반 배포 패턴을 사용합니다. `./cli demo-setup`은 `config.json`에 정의된 인프라와 컴포넌트를 순차적으로 프로비저닝합니다. 개별 컴포넌트는 `./cli <category> <component> install`로 독립 배포할 수 있습니다.
+실습 환경은 `labs/week9/`의 Terraform과 배포 스크립트로 구성합니다. Terraform으로 EKS Auto Mode 클러스터와 EFS를 프로비저닝한 뒤, 순차 스크립트로 vLLM → Langfuse → LiteLLM → Open WebUI를 배포합니다. 상세 배포 절차는 [:octicons-mark-github-16: labs/week9/](https://github.com/pyy0715/eks-pratice/tree/main/labs/week9)를 참고합니다.
 
 ---
 
