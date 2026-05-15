@@ -37,6 +37,7 @@ proxy_config:
       type: redis
       host: litellm-redis-master
       port: 6379
+      password: os.environ/REDIS_PASSWORD
 
 postgresql:
   architecture: standalone
