@@ -1,0 +1,28 @@
+nameOverride: openwebui
+
+ollamaUrls: []
+ollama:
+  enabled: false
+pipelines:
+  enabled: false
+
+openaiBaseApiUrl: "http://litellm.litellm:4000/v1"
+
+extraEnvVars:
+  - name: OPENAI_API_KEY
+    value: "${LITELLM_API_KEY}"
+
+resources:
+  requests:
+    cpu: "1"
+    memory: "2Gi"
+  limits:
+    memory: "2Gi"
+
+persistence:
+  enabled: true
+  size: 100Gi
+
+service:
+  type: ClusterIP
+  port: 80

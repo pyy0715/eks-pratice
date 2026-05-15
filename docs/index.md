@@ -14,7 +14,7 @@
 | 6 | [GitOps on EKS with ArgoCD](week6/index.md) |
 | 7 | [EKS Upgrade](week7/index.md) |
 | 8 | EKS Automation & Operations (Auto Mode, AgentOps) |
-| 9 | ML & AI on EKS |
+| 9 | [ML & AI on EKS](week9/index.md) |
 
 ## Prerequisites
 

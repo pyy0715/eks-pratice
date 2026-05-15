@@ -330,5 +330,3 @@ sequenceDiagram
     Blue 클러스터의 Pod가 EFS 디렉터리에 대해 file lock(FLOCK)을 보유하고 있으면, green 클러스터에서 해당 경로에 쓰기 작업이 실패할 수 있습니다. 트래픽 전환 전에 blue의 StatefulSet을 먼저 삭제하여 lock을 해제해야 합니다.
 
 실제 운영 환경에서는 데이터 동기화 → 앱 기능 테스트 → 트래픽 전환 → blue 클러스터 폐기 순서로 진행합니다.
-
-[^1]: [Best Practices for Cluster Upgrades — Blue/Green](https://docs.aws.amazon.com/eks/latest/best-practices/cluster-upgrades.html)

@@ -180,3 +180,10 @@ nav:
       - Upgrade Strategies: week7/3_upgrade-strategies.md
       - In-Place Upgrade: week7/4_in-place-upgrade.md
       - Blue/Green Upgrade: week7/5_blue-green-upgrade.md
+  - Week 9:
+      - week9/index.md
+      - Background: week9/0_background.md
+      - GPU on Kubernetes: week9/1_gpu-on-kubernetes.md
+      - GenAI Platform Components: week9/2_genai-components.md
+      - Workshop - GenAI on EKS: week9/3_genai-on-eks.md
+      - Workshop - K8s Agentic Platform: week9/4_k8s-agentic-platform.md

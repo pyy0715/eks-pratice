@@ -38,6 +38,24 @@
 *[SigV4]: AWS Signature Version 4 — AWS API 요청에 HMAC-SHA256 기반 서명을 부여하는 프로토콜
 *[RS256]: RSA Signature with SHA-256 — RSA 개인키로 SHA-256 해시에 서명하는 비대칭 서명 알고리즘. OIDC Core가 필수 지원 알고리즘으로 지정
 
+<!-- GPU / ML -->
+*[ASIC]: Application-Specific Integrated Circuit — 특정 용도에 최적화된 전용 반도체 칩. Trainium/Inferentia가 ML 연산 전용 ASIC
+*[GFD]: GPU Feature Discovery — NVIDIA Device Plugin과 함께 배포되어 GPU 모델, 드라이버 버전, 메모리 등의 라벨을 노드에 자동 추가하는 컴포넌트
+*[NEFF]: Neuron Executable File Format — AWS Neuron Compiler가 출력하는 컴파일된 모델 바이너리. Neuron Runtime이 Trainium/Inferentia에서 실행
+*[DRA]: Dynamic Resource Allocation — Kubernetes 1.31+ 에서 도입된 차세대 디바이스 할당 프레임워크. 속성 기반 GPU 선택과 공유를 지원
+*[MIG]: Multi-Instance GPU — NVIDIA A100/H100에서 하나의 물리 GPU를 최대 7개의 독립 인스턴스로 분할하는 기술
+*[TP]: Tensor Parallelism — 하나의 레이어를 여러 GPU에 분할하여 동시 계산하는 병렬화 기법. AllReduce 통신이 필요하므로 NVLink 급 대역폭 필수
+*[PP]: Pipeline Parallelism — 모델을 레이어 단위로 순차 분할하여 GPU별로 다른 레이어를 처리하는 병렬화 기법. 통신량이 TP보다 적어 PCIe에서도 동작
+*[SOCI]: Seekable OCI — 컨테이너 이미지를 전체 다운로드 없이 필요한 레이어만 lazy loading하는 기술
+
+*[ANN]: Approximate Nearest Neighbor — 고차원 벡터 공간에서 정확한 최근접 대신 근사치를 빠르게 찾는 검색 알고리즘
+*[HNSW]: Hierarchical Navigable Small World — 계층적 그래프 구조로 고차원 벡터의 근사 최근접 이웃을 빠르게 탐색하는 인덱싱 알고리즘
+*[TEI]: Text Embeddings Inference — Hugging Face가 제공하는 Rust 기반 임베딩 모델 서빙 엔진. 토큰 기반 동적 배칭 지원
+
+*[EFA]: Elastic Fabric Adapter — OS bypass로 커널을 건너뛰고 네트워크 디바이스와 직접 통신하는 고성능 네트워크 인터페이스. Multi-node 분산 학습에서 노드 간 통신 병목을 해결
+*[NCCL]: NVIDIA Collective Communications Library — GPU 간 AllReduce, Broadcast 등 collective 통신을 최적화하는 라이브러리. EFA와 함께 multi-node 학습에 사용
+*[DLC]: Deep Learning Container — AWS가 관리하는 pre-built ML 컨테이너 이미지. CUDA, cuDNN, NCCL 등 GPU 라이브러리가 포함된 상태로 ECR에서 제공
+
 <!-- Auth RFCs -->
 *[RFC 6749]: The OAuth 2.0 Authorization Framework — 사용자가 비밀번호를 넘기지 않고 서드파티 애플리케이션에 리소스 접근 권한을 위임하도록 표준화한 프로토콜
 *[RFC 6750]: OAuth 2.0 Bearer Token Usage — HTTP Authorization 헤더에 토큰을 실어 보내는 방식을 정의한 표준

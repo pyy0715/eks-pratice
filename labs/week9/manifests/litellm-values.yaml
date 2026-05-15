@@ -1,0 +1,56 @@
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: "1"
+    memory: "2Gi"
+  limits:
+    memory: "2Gi"
+
+service:
+  type: ClusterIP
+  port: 4000
+
+proxy_config:
+  store_model_in_db: true
+  drop_params: true
+  model_list:
+    - model_name: vllm/qwen3-8b-neuron
+      litellm_params:
+        model: openai/qwen3-8b-neuron
+        api_key: fake-key
+        api_base: http://qwen3-8b-neuron.vllm:8000/v1
+    - model_name: bedrock/claude-4.5-sonnet
+      litellm_params:
+        model: bedrock/global.anthropic.claude-sonnet-4-5-20250929-v1:0
+        aws_region_name: us-east-2
+  litellm_settings:
+    success_callback:
+      - langfuse
+    cache: true
+    cache_params:
+      type: redis
+      host: litellm-redis-master
+      port: 6379
+
+postgresql:
+  enabled: true
+  auth:
+    username: admin
+    password: password123
+  primary:
+    resources:
+      requests:
+        cpu: 125m
+        memory: 256Mi
+
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    resources:
+      requests:
+        cpu: 125m
+        memory: 256Mi
