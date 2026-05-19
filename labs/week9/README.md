@@ -18,17 +18,29 @@ GPU/Neuron 인스턴스의 기본 vCPU 할당량은 0입니다. AWS 콘솔 > Ser
 ```bash
 cd labs/week9
 terraform init
+
+# 1단계: VPC + EKS 클러스터 생성 (VPC는 의존성으로 자동 포함)
+terraform apply -target=module.eks
+
+# 2단계: 나머지 리소스 생성 (Addons, EFS, NodePools 등)
 terraform apply
 ```
+
+> [!NOTE]
+> **왜 2단계로 나누나요?**
+> `kubectl`, `kubernetes`, `helm` provider는 EKS 클러스터 endpoint와 인증 토큰을 참조합니다.
+> 클러스터가 존재하지 않는 상태에서 `terraform apply`를 실행하면 provider 초기화가 실패합니다.
+> 1단계에서 클러스터를 먼저 만들면 2단계에서 provider가 정상 연결됩니다.
 
 VPC, EKS Auto Mode, EFS, NodePools(general/GPU/Neuron), EFS CSI Driver, StorageClasses가 생성됩니다.
 
 ### Step 2: Environment Variables
 
+`00_env.sh`에서 `AWS_REGION`(기본 `us-east-2`)과 `EKS_CLUSTER_NAME`(기본 `genai-eks`)을 자동 설정합니다.
+vLLM 배포 시 HuggingFace 토큰만 직접 설정하면 됩니다.
+
 ```bash
-export HF_TOKEN="hf_xxx"              # 필수: HuggingFace 토큰
-export AWS_REGION="us-east-2"          # 기본값
-export EKS_CLUSTER_NAME="genai-eks"    # 기본값
+export HF_TOKEN="hf_xxx"
 ```
 
 ### Step 3: Components
